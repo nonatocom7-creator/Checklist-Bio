@@ -218,10 +218,10 @@
 
                 <button onclick="app.finishRoute()" id="btn-report" class="bg-white border-2 border-emerald-600 text-emerald-700 hover:bg-emerald-50 rounded-xl p-5 flex items-center justify-between transition-colors shadow-sm mt-4">
                     <div class="text-left">
-                        <h3 class="font-bold text-lg">Finalizar Rota (Gerar PDF)</h3>
-                        <p class="text-sm text-slate-500">Salva no histórico e finaliza o dia</p>
+                        <h3 class="font-bold text-lg">Finalizar Rota</h3>
+                        <p class="text-sm text-slate-500">Salva no histórico e envia para a nuvem</p>
                     </div>
-                    <i class="fa-solid fa-file-pdf text-3xl text-emerald-500"></i>
+                    <i class="fa-solid fa-check-double text-3xl text-emerald-500"></i>
                 </button>
             </div>
         </div>
@@ -1388,7 +1388,7 @@ const app = {
 
         this.showConfirmModal(
             "Finalizar Rota", 
-            "Deseja encerrar a rota atual? O relatório será salvo no Histórico, enviado para a nuvem e o PDF gerado.",
+            "Deseja encerrar a rota atual? O relatório será salvo e enviado para a nuvem automaticamente. A tela de operação será limpa.",
             () => {
                 const record = {
                     id: Date.now(),
@@ -1437,8 +1437,7 @@ const app = {
                 this.updateUI();
                 this.renderHistory();
                 
-                this.showToast('Rota finalizada e salva no histórico!', 'success');
-                this.generatePDF(record);
+                this.showToast('Rota finalizada e enviada para a nuvem com sucesso!', 'success');
             }
         );
     },
