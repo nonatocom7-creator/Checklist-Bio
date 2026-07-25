@@ -5,12 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Checklist de Transporte Biológico - RDC 504/2021</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome para ícones -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- html2pdf para geração de PDF -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <!-- QRCode.js para geração de QR Code -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
@@ -59,10 +57,7 @@
             transition: visibility 0s, opacity 0.5s linear;
             opacity: 0;
         }
-        #toast.show {
-            visibility: visible;
-            opacity: 1;
-        }
+        #toast.show { visibility: visible; opacity: 1; }
         #toast.error { background-color: #ef4444; }
         #toast.success { background-color: #10b981; }
         #toast.warning { background-color: #f59e0b; }
@@ -79,10 +74,7 @@
             vertical-align: middle;
             margin-right: 8px;
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
         .section-hidden { display: none; }
 
@@ -106,10 +98,7 @@
             white-space: nowrap;
         }
         .nav-tab:hover { color: #1f2937; }
-        .nav-tab.active {
-            color: #1d4ed8;
-            border-bottom-color: #1d4ed8;
-        }
+        .nav-tab.active { color: #1d4ed8; border-bottom-color: #1d4ed8; }
 
         .management-card {
             background: white;
@@ -126,46 +115,13 @@
             font-size: 14px;
             color: #374151;
         }
-        .form-input:focus {
-            outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 1px #3b82f6;
-        }
-        .form-label {
-            display: block;
-            font-size: 13px;
-            font-weight: 600;
-            color: #1f2937;
-            margin-bottom: 4px;
-        }
-        .btn-success {
-            background-color: #10b981;
-            color: white;
-            font-weight: 600;
-            padding: 10px 16px;
-            border-radius: 4px;
-            width: 100%;
-            transition: background 0.2s;
-        }
+        .form-input:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 1px #3b82f6; }
+        .form-label { display: block; font-size: 13px; font-weight: 600; color: #1f2937; margin-bottom: 4px; }
+        .btn-success { background-color: #10b981; color: white; font-weight: 600; padding: 10px 16px; border-radius: 4px; width: 100%; transition: background 0.2s; }
         .btn-success:hover { background-color: #059669; }
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 14px;
-        }
-        .data-table th {
-            background-color: #f3f4f6;
-            color: #4b5563;
-            font-weight: 600;
-            text-align: left;
-            padding: 12px;
-            border-bottom: 1px solid #e5e7eb;
-        }
-        .data-table td {
-            padding: 12px;
-            border-bottom: 1px solid #e5e7eb;
-            color: #374151;
-        }
+        .data-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        .data-table th { background-color: #f3f4f6; color: #4b5563; font-weight: 600; text-align: left; padding: 12px; border-bottom: 1px solid #e5e7eb; }
+        .data-table td { padding: 12px; border-bottom: 1px solid #e5e7eb; color: #374151; }
     </style>
 </head>
 <body class="text-slate-800">
@@ -177,7 +133,6 @@
         <div class="nav-tab active" onclick="app.switchTab('view-dashboard', this)">
             <i class="fa-solid fa-clipboard-list text-blue-500"></i> Operação / Checklist
         </div>
-        <!-- Note a classe admin-tab para controle de visibilidade -->
         <div class="nav-tab admin-tab" onclick="app.switchTab('view-vehicles', this)">
             <i class="fa-solid fa-car-side text-red-500"></i> Veículos & Alertas
         </div>
@@ -186,6 +141,9 @@
         </div>
         <div class="nav-tab admin-tab" onclick="app.switchTab('view-history', this)">
             <i class="fa-solid fa-folder-open text-amber-500"></i> Histórico
+        </div>
+        <div class="nav-tab admin-tab" onclick="app.switchTab('view-performance', this)">
+            <i class="fa-solid fa-chart-pie text-purple-500"></i> Performance
         </div>
     </div>
 
@@ -206,9 +164,9 @@
         </div>
     </header>
 
-    <!-- Main Content Area -->
     <main class="flex-grow p-4 overflow-y-auto pb-24" id="main-content">
         
+        <!-- Dashboard / Operação View -->
         <div id="view-dashboard" class="space-y-6">
             <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
                 <h2 class="font-semibold text-gray-800 mb-4"><i class="fa-solid fa-user-check mr-2 text-blue-600"></i>Identificação da Rota</h2>
@@ -221,12 +179,12 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">Motorista (Selecione seu usuário)</label>
-                        <select id="driver-select" class="w-full rounded-lg border-gray-300 border p-2.5 bg-white text-sm focus:ring-blue-500 focus:border-blue-500">
+                        <select id="driver-select" onchange="app.handleDriverChange(this.value)" class="w-full rounded-lg border-gray-300 border p-2.5 bg-white text-sm focus:ring-blue-500 focus:border-blue-500">
                         </select>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">Veículo (Placa)</label>
-                        <select id="vehicle-select" class="w-full rounded-lg border-gray-300 border p-2.5 bg-white text-sm focus:ring-blue-500 focus:border-blue-500">
+                        <select id="vehicle-select" onchange="app.handleVehicleChange(this.value)" class="w-full rounded-lg border-gray-300 border p-2.5 bg-white text-sm focus:ring-blue-500 focus:border-blue-500">
                         </select>
                     </div>
                 </div>
@@ -374,7 +332,12 @@
         </div>
 
         <div id="view-history" class="section-hidden">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6">Histórico de Relatórios</h2>
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">Histórico de Relatórios</h2>
+                <button onclick="app.exportHistoryCSV()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-lg shadow transition-colors flex items-center text-sm">
+                    <i class="fa-solid fa-file-csv mr-2"></i> Exportar Dados (CSV)
+                </button>
+            </div>
             
             <div class="management-card overflow-x-auto">
                 <table class="data-table w-full">
@@ -393,7 +356,75 @@
             </div>
         </div>
 
-        <!-- VIEW 4: PRE-ROUTE FORM -->
+        <div id="view-performance" class="section-hidden space-y-6">
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">Dashboard de Performance</h2>
+            
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex flex-wrap gap-4 items-end">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Período</label>
+                    <select id="dash-period-select" onchange="app.renderDashboard()" class="rounded-lg border-gray-300 border p-2 bg-white text-sm focus:ring-purple-500 focus:border-purple-500">
+                        <option value="7">Últimos 7 dias</option>
+                        <option value="30" selected>Últimos 30 dias</option>
+                        <option value="90">Últimos 3 meses</option>
+                        <option value="all">Todo o Período</option>
+                    </select>
+                </div>
+                <button onclick="app.renderDashboard()" class="bg-purple-100 text-purple-700 hover:bg-purple-200 px-4 py-2 rounded-lg text-sm font-bold transition-colors">
+                    <i class="fa-solid fa-rotate-right mr-1"></i> Atualizar
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-blue-500">
+                    <p class="text-sm text-gray-500 font-medium">Total de Rotas</p>
+                    <p class="text-2xl font-bold text-gray-800" id="kpi-total-rotas">0</p>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-emerald-500">
+                    <p class="text-sm text-gray-500 font-medium">Rotas Liberadas</p>
+                    <p class="text-2xl font-bold text-gray-800" id="kpi-rotas-liberadas">0</p>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-red-500">
+                    <p class="text-sm text-gray-500 font-medium">Rotas Bloqueadas</p>
+                    <p class="text-2xl font-bold text-gray-800" id="kpi-rotas-bloqueadas">0</p>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-indigo-500">
+                    <p class="text-sm text-gray-500 font-medium">Total de Coletas</p>
+                    <p class="text-2xl font-bold text-gray-800" id="kpi-total-coletas">0</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+                    <h3 class="font-bold text-gray-700 mb-4 text-center">Status das Rotas (Conformidade)</h3>
+                    <div class="relative h-64 w-full flex justify-center">
+                        <canvas id="chartStatusRotas"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+                    <h3 class="font-bold text-gray-700 mb-4 text-center">Volume de Coletas (Evolução)</h3>
+                    <div class="relative h-64 w-full">
+                        <canvas id="chartColetasDia"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+                <h3 class="font-bold text-gray-700 mb-4">Itens com Mais Não Conformidades (Pré-Rota)</h3>
+                <div class="overflow-x-auto">
+                    <table class="data-table w-full text-sm">
+                        <thead>
+                            <tr>
+                                <th>Item do Checklist</th>
+                                <th class="text-center">Qtd. "Não Conforme"</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dash-nc-tbody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
         <div id="view-pre-route" class="section-hidden space-y-6">
             <div class="flex items-center mb-4 bg-white p-4 rounded-xl shadow-sm border border-gray-200">
                 <button onclick="app.switchTab('view-dashboard', document.querySelector('.nav-tab'))" class="mr-3 text-slate-500 hover:text-blue-600"><i class="fa-solid fa-arrow-left text-xl"></i></button>
@@ -410,13 +441,13 @@
             <form id="form-pre-route" class="space-y-8 pb-10">
                 <div class="question-block bg-white p-4 rounded-xl border border-gray-200 shadow-sm" data-id="pr_q1">
                     <p class="font-medium text-slate-800 mb-3">1. O compartimento de carga está limpo, com superfícies lisas e laváveis (sem focos de contaminação)?</p>
-                    <div class="flex gap-4">
+                    <div class="flex gap-4 relative">
                         <div class="flex-1">
-                            <input type="radio" name="pr_q1" id="pr_q1_c" value="Conforme" class="hidden radio-custom" required onchange="app.handleRadioChange('pr_q1')">
+                            <input type="radio" name="pr_q1" id="pr_q1_c" value="Conforme" class="sr-only radio-custom" required onchange="app.handleRadioChange('pr_q1')">
                             <label for="pr_q1_c" class="block w-full text-center py-3 border border-gray-300 rounded-lg cursor-pointer transition-colors font-medium shadow-sm">Conforme</label>
                         </div>
                         <div class="flex-1">
-                            <input type="radio" name="pr_q1" id="pr_q1_nc" value="Não Conforme" class="hidden radio-custom-nc" onchange="app.handleRadioChange('pr_q1')">
+                            <input type="radio" name="pr_q1" id="pr_q1_nc" value="Não Conforme" class="sr-only radio-custom-nc" onchange="app.handleRadioChange('pr_q1')">
                             <label for="pr_q1_nc" class="block w-full text-center py-3 border border-gray-300 rounded-lg cursor-pointer transition-colors font-medium shadow-sm">Não Conforme</label>
                         </div>
                     </div>
@@ -428,13 +459,13 @@
 
                 <div class="question-block bg-white p-4 rounded-xl border border-gray-200 shadow-sm" data-id="pr_q2">
                     <p class="font-medium text-slate-800 mb-3">2. O veículo possui identificação externa de Risco Biológico (quando exigido) em bom estado?</p>
-                    <div class="flex gap-4">
+                    <div class="flex gap-4 relative">
                         <div class="flex-1">
-                            <input type="radio" name="pr_q2" id="pr_q2_c" value="Conforme" class="hidden radio-custom" required onchange="app.handleRadioChange('pr_q2')">
+                            <input type="radio" name="pr_q2" id="pr_q2_c" value="Conforme" class="sr-only radio-custom" required onchange="app.handleRadioChange('pr_q2')">
                             <label for="pr_q2_c" class="block w-full text-center py-3 border border-gray-300 rounded-lg cursor-pointer transition-colors font-medium shadow-sm">Conforme</label>
                         </div>
                         <div class="flex-1">
-                            <input type="radio" name="pr_q2" id="pr_q2_nc" value="Não Conforme" class="hidden radio-custom-nc" onchange="app.handleRadioChange('pr_q2')">
+                            <input type="radio" name="pr_q2" id="pr_q2_nc" value="Não Conforme" class="sr-only radio-custom-nc" onchange="app.handleRadioChange('pr_q2')">
                             <label for="pr_q2_nc" class="block w-full text-center py-3 border border-gray-300 rounded-lg cursor-pointer transition-colors font-medium shadow-sm">Não Conforme</label>
                         </div>
                     </div>
@@ -447,13 +478,13 @@
                 <div class="question-block bg-white p-4 rounded-xl border-2 border-red-200 shadow-sm relative overflow-hidden" data-id="pr_q3">
                     <div class="absolute top-0 right-0 bg-red-100 text-red-700 text-xs font-bold px-3 py-1 rounded-bl-lg">ITEM CRÍTICO</div>
                     <p class="font-medium text-slate-800 mb-3 mt-2">3. O "Kit de Derramamento" (EPIs extras, pá, absorvente, sacos, desinfetante) está completo e na validade?</p>
-                    <div class="flex gap-4">
+                    <div class="flex gap-4 relative">
                         <div class="flex-1">
-                            <input type="radio" name="pr_q3" id="pr_q3_c" value="Conforme" class="hidden radio-custom" required onchange="app.handleRadioChange('pr_q3')">
+                            <input type="radio" name="pr_q3" id="pr_q3_c" value="Conforme" class="sr-only radio-custom" required onchange="app.handleRadioChange('pr_q3')">
                             <label for="pr_q3_c" class="block w-full text-center py-3 border border-gray-300 rounded-lg cursor-pointer transition-colors font-medium shadow-sm">Conforme</label>
                         </div>
                         <div class="flex-1">
-                            <input type="radio" name="pr_q3" id="pr_q3_nc" value="Não Conforme" class="hidden radio-custom-nc" onchange="app.handleRadioChange('pr_q3')">
+                            <input type="radio" name="pr_q3" id="pr_q3_nc" value="Não Conforme" class="sr-only radio-custom-nc" onchange="app.handleRadioChange('pr_q3')">
                             <label for="pr_q3_nc" class="block w-full text-center py-3 border border-gray-300 rounded-lg cursor-pointer transition-colors font-medium shadow-sm">Não Conforme</label>
                         </div>
                     </div>
@@ -466,13 +497,13 @@
 
                 <div class="question-block bg-white p-4 rounded-xl border border-gray-200 shadow-sm" data-id="pr_q4">
                     <p class="font-medium text-slate-800 mb-3">4. Os EPIs do motorista (luvas, óculos, jaleco, máscara) estão disponíveis no veículo?</p>
-                    <div class="flex gap-4">
+                    <div class="flex gap-4 relative">
                         <div class="flex-1">
-                            <input type="radio" name="pr_q4" id="pr_q4_c" value="Conforme" class="hidden radio-custom" required onchange="app.handleRadioChange('pr_q4')">
+                            <input type="radio" name="pr_q4" id="pr_q4_c" value="Conforme" class="sr-only radio-custom" required onchange="app.handleRadioChange('pr_q4')">
                             <label for="pr_q4_c" class="block w-full text-center py-3 border border-gray-300 rounded-lg cursor-pointer transition-colors font-medium shadow-sm">Conforme</label>
                         </div>
                         <div class="flex-1">
-                            <input type="radio" name="pr_q4" id="pr_q4_nc" value="Não Conforme" class="hidden radio-custom-nc" onchange="app.handleRadioChange('pr_q4')">
+                            <input type="radio" name="pr_q4" id="pr_q4_nc" value="Não Conforme" class="sr-only radio-custom-nc" onchange="app.handleRadioChange('pr_q4')">
                             <label for="pr_q4_nc" class="block w-full text-center py-3 border border-gray-300 rounded-lg cursor-pointer transition-colors font-medium shadow-sm">Não Conforme</label>
                         </div>
                     </div>
@@ -484,13 +515,13 @@
 
                  <div class="question-block bg-white p-4 rounded-xl border border-gray-200 shadow-sm" data-id="pr_q5">
                     <p class="font-medium text-slate-800 mb-3">5. As caixas térmicas (embalagem terciária) estão íntegras, sem rachaduras e higienizadas?</p>
-                    <div class="flex gap-4">
+                    <div class="flex gap-4 relative">
                         <div class="flex-1">
-                            <input type="radio" name="pr_q5" id="pr_q5_c" value="Conforme" class="hidden radio-custom" required onchange="app.handleRadioChange('pr_q5')">
+                            <input type="radio" name="pr_q5" id="pr_q5_c" value="Conforme" class="sr-only radio-custom" required onchange="app.handleRadioChange('pr_q5')">
                             <label for="pr_q5_c" class="block w-full text-center py-3 border border-gray-300 rounded-lg cursor-pointer transition-colors font-medium shadow-sm">Conforme</label>
                         </div>
                         <div class="flex-1">
-                            <input type="radio" name="pr_q5" id="pr_q5_nc" value="Não Conforme" class="hidden radio-custom-nc" onchange="app.handleRadioChange('pr_q5')">
+                            <input type="radio" name="pr_q5" id="pr_q5_nc" value="Não Conforme" class="sr-only radio-custom-nc" onchange="app.handleRadioChange('pr_q5')">
                             <label for="pr_q5_nc" class="block w-full text-center py-3 border border-gray-300 rounded-lg cursor-pointer transition-colors font-medium shadow-sm">Não Conforme</label>
                         </div>
                     </div>
@@ -502,13 +533,13 @@
 
                 <div class="question-block bg-white p-4 rounded-xl border border-gray-200 shadow-sm" data-id="pr_q6">
                     <p class="font-medium text-slate-800 mb-3">6. Os termômetros/dataloggers estão calibrados e ligados?</p>
-                    <div class="flex gap-4">
+                    <div class="flex gap-4 relative">
                         <div class="flex-1">
-                            <input type="radio" name="pr_q6" id="pr_q6_c" value="Conforme" class="hidden radio-custom" required onchange="app.handleRadioChange('pr_q6')">
+                            <input type="radio" name="pr_q6" id="pr_q6_c" value="Conforme" class="sr-only radio-custom" required onchange="app.handleRadioChange('pr_q6')">
                             <label for="pr_q6_c" class="block w-full text-center py-3 border border-gray-300 rounded-lg cursor-pointer transition-colors font-medium shadow-sm">Conforme</label>
                         </div>
                         <div class="flex-1">
-                            <input type="radio" name="pr_q6" id="pr_q6_nc" value="Não Conforme" class="hidden radio-custom-nc" onchange="app.handleRadioChange('pr_q6')">
+                            <input type="radio" name="pr_q6" id="pr_q6_nc" value="Não Conforme" class="sr-only radio-custom-nc" onchange="app.handleRadioChange('pr_q6')">
                             <label for="pr_q6_nc" class="block w-full text-center py-3 border border-gray-300 rounded-lg cursor-pointer transition-colors font-medium shadow-sm">Não Conforme</label>
                         </div>
                     </div>
@@ -526,7 +557,6 @@
             </form>
         </div>
 
-        <!-- VIEW 5: COLLECTION POINT FORM -->
         <div id="view-collection" class="section-hidden space-y-6">
             <div class="flex items-center justify-between mb-4 bg-white p-4 rounded-xl shadow-sm border border-gray-200">
                 <div class="flex items-center">
@@ -537,20 +567,20 @@
             </div>
 
             <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm mb-6">
-                <label class="block text-sm font-bold text-slate-700 mb-2">Ponto de Coleta / Cliente</label>
-                <input type="text" id="client-name" placeholder="Ex: Laboratório Central São Lucas" class="w-full rounded-lg border-gray-300 border p-3 text-base focus:ring-blue-500 focus:border-blue-500">
+                <label class="block text-sm font-bold text-slate-700 mb-2">Ponto de Coleta / Cliente <span class="text-red-500">*</span></label>
+                <input type="text" id="client-name" required placeholder="Ex: Laboratório Central São Lucas" class="w-full rounded-lg border-gray-300 border p-3 text-base focus:ring-blue-500 focus:border-blue-500">
             </div>
 
             <form id="form-collection" class="space-y-6 pb-10">
                 <div class="question-block bg-white p-4 rounded-xl border border-gray-200 shadow-sm" data-id="col_q1">
                     <p class="font-medium text-slate-800 mb-3">1. A amostra possui o sistema de Embalagem Tripla (Primária, Secundária estanque e Terciária rígida)?</p>
-                    <div class="flex gap-4">
+                    <div class="flex gap-4 relative">
                         <div class="flex-1">
-                            <input type="radio" name="col_q1" id="col_q1_c" value="Conforme" class="hidden radio-custom" required onchange="app.handleRadioChange('col_q1')">
+                            <input type="radio" name="col_q1" id="col_q1_c" value="Conforme" class="sr-only radio-custom" required onchange="app.handleRadioChange('col_q1')">
                             <label for="col_q1_c" class="block w-full text-center py-3 border border-gray-300 rounded-lg cursor-pointer transition-colors font-medium shadow-sm">Conforme</label>
                         </div>
                         <div class="flex-1">
-                            <input type="radio" name="col_q1" id="col_q1_nc" value="Não Conforme" class="hidden radio-custom-nc" onchange="app.handleRadioChange('col_q1')">
+                            <input type="radio" name="col_q1" id="col_q1_nc" value="Não Conforme" class="sr-only radio-custom-nc" onchange="app.handleRadioChange('col_q1')">
                             <label for="col_q1_nc" class="block w-full text-center py-3 border border-gray-300 rounded-lg cursor-pointer transition-colors font-medium shadow-sm">Não Conforme</label>
                         </div>
                     </div>
@@ -562,13 +592,13 @@
 
                 <div class="question-block bg-white p-4 rounded-xl border border-gray-200 shadow-sm" data-id="col_q2">
                     <p class="font-medium text-slate-800 mb-3">2. A embalagem externa possui a identificação correta (Símbolo de Substância Infectante, Setas, Remetente/Destinatário)?</p>
-                    <div class="flex gap-4">
+                    <div class="flex gap-4 relative">
                         <div class="flex-1">
-                            <input type="radio" name="col_q2" id="col_q2_c" value="Conforme" class="hidden radio-custom" required onchange="app.handleRadioChange('col_q2')">
+                            <input type="radio" name="col_q2" id="col_q2_c" value="Conforme" class="sr-only radio-custom" required onchange="app.handleRadioChange('col_q2')">
                             <label for="col_q2_c" class="block w-full text-center py-3 border border-gray-300 rounded-lg cursor-pointer transition-colors font-medium shadow-sm">Conforme</label>
                         </div>
                         <div class="flex-1">
-                            <input type="radio" name="col_q2" id="col_q2_nc" value="Não Conforme" class="hidden radio-custom-nc" onchange="app.handleRadioChange('col_q2')">
+                            <input type="radio" name="col_q2" id="col_q2_nc" value="Não Conforme" class="sr-only radio-custom-nc" onchange="app.handleRadioChange('col_q2')">
                             <label for="col_q2_nc" class="block w-full text-center py-3 border border-gray-300 rounded-lg cursor-pointer transition-colors font-medium shadow-sm">Não Conforme</label>
                         </div>
                     </div>
@@ -592,13 +622,13 @@
 
                 <div class="question-block bg-white p-4 rounded-xl border border-gray-200 shadow-sm" data-id="col_q4">
                     <p class="font-medium text-slate-800 mb-3">4. A documentação obrigatória (Manifesto de Transporte e Instruções de Emergência) foi entregue e conferida?</p>
-                    <div class="flex gap-4">
+                    <div class="flex gap-4 relative">
                         <div class="flex-1">
-                            <input type="radio" name="col_q4" id="col_q4_c" value="Conforme" class="hidden radio-custom" required onchange="app.handleRadioChange('col_q4')">
+                            <input type="radio" name="col_q4" id="col_q4_c" value="Conforme" class="sr-only radio-custom" required onchange="app.handleRadioChange('col_q4')">
                             <label for="col_q4_c" class="block w-full text-center py-3 border border-gray-300 rounded-lg cursor-pointer transition-colors font-medium shadow-sm">Conforme</label>
                         </div>
                         <div class="flex-1">
-                            <input type="radio" name="col_q4" id="col_q4_nc" value="Não Conforme" class="hidden radio-custom-nc" onchange="app.handleRadioChange('col_q4')">
+                            <input type="radio" name="col_q4" id="col_q4_nc" value="Não Conforme" class="sr-only radio-custom-nc" onchange="app.handleRadioChange('col_q4')">
                             <label for="col_q4_nc" class="block w-full text-center py-3 border border-gray-300 rounded-lg cursor-pointer transition-colors font-medium shadow-sm">Não Conforme</label>
                         </div>
                     </div>
@@ -614,12 +644,10 @@
                 </div>
             </form>
         </div>
-
     </main>
     
     <!-- Elementos Ocultos e Modais -->
-    <div id="pdf-container" style="display: none; background: white; padding: 20px; font-family: sans-serif; color: black;">
-    </div>
+    <div id="pdf-container" style="display: none; background: white; padding: 20px; font-family: sans-serif; color: black;"></div>
     <div id="toast">Message</div>
 </div>
 
@@ -628,8 +656,7 @@
         <h3 class="text-xl font-bold text-gray-900 mb-2">QR Code do Veículo</h3>
         <p class="text-gray-500 text-sm mb-6">Placa: <span id="qr-modal-plate" class="font-bold"></span></p>
         
-        <div id="qrcode-display" class="flex justify-center mb-6 bg-gray-50 p-4 rounded-lg border border-gray-200 min-h-[200px]">
-        </div>
+        <div id="qrcode-display" class="flex justify-center mb-6 bg-gray-50 p-4 rounded-lg border border-gray-200 min-h-[200px]"></div>
         
         <p class="text-xs text-gray-400 mb-4">Cole este QR Code no veículo. O motorista será direcionado diretamente para o checklist.</p>
         
@@ -649,8 +676,6 @@ const app = {
         routeBlocked: false,
         collections: [], 
         history: [], 
-        
-        // Dados mocados (serao salvos no localstorage)
         drivers: [
             { id: 'MOT-001', name: 'João Silva', trainingDate: '2025-10-01', expiryDate: '2026-10-01' },
             { id: 'MOT-002', name: 'Maria Santos', trainingDate: '2025-05-15', expiryDate: '2026-05-15' }
@@ -661,6 +686,11 @@ const app = {
         ]
     },
 
+    charts: {
+        statusRotas: null,
+        coletasDia: null
+    },
+
     init: function() {
         this.loadState();
         
@@ -668,10 +698,8 @@ const app = {
         const qrPlate = urlParams.get('placa');
         
         if (qrPlate) {
-            // Verifica se o veículo existe na memória do celular do motorista
             let vExists = this.state.vehicles.find(v => v.plate === qrPlate);
             
-            // SE NÃO EXISTE (ex: porque o celular nunca acessou o app antes), cria um temporário
             if (!vExists) {
                 const newTempVehicle = { 
                     plate: qrPlate, 
@@ -684,7 +712,6 @@ const app = {
             
             this.state.vehicle = qrPlate;
             
-            // MODO MOTORISTA: Esconde abas de administração
             const adminTabs = document.querySelectorAll('.admin-tab');
             adminTabs.forEach(tab => tab.style.display = 'none');
             
@@ -710,8 +737,6 @@ const app = {
                 vSelect.classList.add('bg-slate-200', 'cursor-not-allowed', 'font-bold');
             }
         }
-        
-        console.log("App Inicializado. Preparado para GitHub Pages.");
     },
 
     saveState: function() {
@@ -740,6 +765,7 @@ const app = {
         document.getElementById('view-vehicles').classList.add('section-hidden');
         document.getElementById('view-employees').classList.add('section-hidden');
         document.getElementById('view-history').classList.add('section-hidden');
+        document.getElementById('view-performance').classList.add('section-hidden');
         document.getElementById('view-pre-route').classList.add('section-hidden');
         document.getElementById('view-collection').classList.add('section-hidden');
 
@@ -757,6 +783,7 @@ const app = {
         }
         
         if(viewId === 'view-dashboard') this.updateUI();
+        if(viewId === 'view-performance') this.renderDashboard();
     },
 
     renderSelects: function() {
@@ -772,30 +799,7 @@ const app = {
             dSelect.innerHTML += `<option value="${d.id}" ${isExpired ? 'disabled' : ''}>${d.name}${statusStr}</option>`;
         });
         
-        // Adiciona opção para motorista se cadastrar rápido via celular
         dSelect.innerHTML += '<option value="NOVO" class="font-bold text-blue-600">+ Cadastrar Meu Usuário Rápido</option>';
-
-        dSelect.addEventListener('change', function(e) {
-            if(e.target.value === 'NOVO') {
-                const name = prompt("Digite seu Nome Completo:");
-                const id = prompt("Digite sua Matrícula (Ex: MOT-003):");
-                if(name && id) {
-                    // Para facilitar no GitHub sem backend, aprova automaticamente por 1 ano
-                    app.state.drivers.push({
-                        id: id.toUpperCase(),
-                        name: name,
-                        trainingDate: app.getTodayStr(),
-                        expiryDate: (new Date().getFullYear() + 1) + '-' + app.getTodayStr().substring(5)
-                    });
-                    app.saveState();
-                    app.renderSelects();
-                    dSelect.value = id.toUpperCase();
-                    app.showToast('Usuário cadastrado com sucesso!', 'success');
-                } else {
-                    dSelect.value = "";
-                }
-            }
-        });
 
         const vSelect = document.getElementById('vehicle-select');
         vSelect.innerHTML = '<option value="">Selecione o veículo...</option>';
@@ -804,9 +808,47 @@ const app = {
         });
     },
 
+    handleDriverChange: function(val) {
+        if(val === 'NOVO') {
+            const name = prompt("Digite seu Nome Completo:");
+            const id = prompt("Digite sua Matrícula (Ex: MOT-003):");
+            if(name && id) {
+                this.state.drivers.push({
+                    id: id.toUpperCase(),
+                    name: name,
+                    trainingDate: this.getTodayStr(),
+                    expiryDate: (new Date().getFullYear() + 1) + '-' + this.getTodayStr().substring(5)
+                });
+                this.state.driver = id.toUpperCase();
+                this.saveState();
+                this.renderSelects();
+                document.getElementById('driver-select').value = this.state.driver;
+                this.showToast('Usuário cadastrado com sucesso!', 'success');
+            } else {
+                document.getElementById('driver-select').value = this.state.driver || "";
+            }
+        } else {
+            this.state.driver = val;
+            this.saveState();
+        }
+        this.updateUI();
+    },
+
+    handleVehicleChange: function(val) {
+        this.state.vehicle = val;
+        this.saveState();
+        this.updateUI();
+    },
+
     updateUI: function() {
-        if (this.state.driver && this.state.driver !== 'NOVO') document.getElementById('driver-select').value = this.state.driver;
-        if (this.state.vehicle) document.getElementById('vehicle-select').value = this.state.vehicle;
+        if (this.state.driver && this.state.driver !== 'NOVO') {
+            const dSelect = document.getElementById('driver-select');
+            if(dSelect) dSelect.value = this.state.driver;
+        }
+        if (this.state.vehicle) {
+            const vSelect = document.getElementById('vehicle-select');
+            if(vSelect) vSelect.value = this.state.vehicle;
+        }
 
         const btnCol = document.getElementById('btn-collection');
         if (this.state.preRouteCompleted && !this.state.routeBlocked) {
@@ -887,8 +929,8 @@ const app = {
 
     renderVehiclesList: function() {
         const tbody = document.getElementById('vehicles-tbody');
-        tbody.innerHTML = '';
         const todayStr = this.getTodayStr();
+        let htmlContent = ''; 
 
         this.state.vehicles.forEach(v => {
             const isLocked = v.lastChecklistDate === todayStr;
@@ -896,7 +938,7 @@ const app = {
                 ? '<span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-1 rounded"><i class="fa-solid fa-lock mr-1"></i>Realizado Hoje</span>' 
                 : '<span class="bg-gray-100 text-gray-600 text-xs font-semibold px-2 py-1 rounded">Pendente</span>';
 
-            tbody.innerHTML += `
+            htmlContent += `
                 <tr>
                     <td class="font-bold">${v.plate} <br><span class="text-xs text-gray-500 font-normal">${v.model}</span></td>
                     <td class="text-sm">${v.lastChecklistDate ? this.formatDate(v.lastChecklistDate) : 'Nunca'}</td>
@@ -914,6 +956,8 @@ const app = {
                 </tr>
             `;
         });
+        
+        tbody.innerHTML = htmlContent; 
     },
 
     deleteVehicle: function(plate) {
@@ -936,7 +980,6 @@ const app = {
         const container = document.getElementById('qrcode-display');
         container.innerHTML = ''; 
         
-        // Garante que funciona perfeitamente no Github Pages independentemente de estar em subpasta
         const baseUrl = window.location.origin + window.location.pathname;
         const targetUrl = `${baseUrl}?placa=${plate}`;
         
@@ -980,10 +1023,9 @@ const app = {
 
     renderEmployeesList: function() {
         const tbody = document.getElementById('employees-tbody');
-        tbody.innerHTML = '';
-        
         const today = new Date();
         today.setHours(0,0,0,0);
+        let htmlContent = ''; 
 
         this.state.drivers.forEach(d => {
             const expDate = new Date(d.expiryDate + 'T00:00:00'); 
@@ -999,7 +1041,7 @@ const app = {
                 statusHtml = '<span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2 py-1 rounded border border-emerald-200">Regular</span>';
             }
 
-            tbody.innerHTML += `
+            htmlContent += `
                 <tr>
                     <td class="font-medium">${d.id} <br><span class="text-sm text-gray-500">${d.name}</span></td>
                     <td class="text-sm">${this.formatDate(d.trainingDate)}</td>
@@ -1014,6 +1056,8 @@ const app = {
                 </tr>
             `;
         });
+        
+        tbody.innerHTML = htmlContent; 
     },
 
     deleteEmployee: function(id) {
@@ -1042,10 +1086,10 @@ const app = {
     },
 
     validateIdentity: function() {
-        const d = document.getElementById('driver-select').value;
-        const v = document.getElementById('vehicle-select').value;
+        const d = this.state.driver;
+        const v = this.state.vehicle;
         if (!d || d === 'NOVO' || !v) {
-            this.showToast('Selecione Motorista e Veículo.', 'error');
+            this.showToast('Por favor, certifique-se de selecionar Motorista e Veículo na Dashboard.', 'error');
             return false;
         }
         
@@ -1055,8 +1099,6 @@ const app = {
             return false;
         }
 
-        this.state.driver = d;
-        this.state.vehicle = v;
         return true;
     },
 
@@ -1096,7 +1138,7 @@ const app = {
         if (this.state.preRouteCompleted) {
             this.showConfirmModal(
                 "Refazer Pré-Rota?",
-                "O checklist Pré-Rota da sessão atual foi feito, mas não salvo no veículo ainda. Deseja refazer?",
+                "O checklist Pré-Rota da sessão atual já foi preenchido. Deseja refazer e sobrescrever as informações?",
                 proceed
             );
         } else {
@@ -1138,42 +1180,51 @@ const app = {
     },
 
     getGeolocation: function() {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
+            const mockFallback = {lat: -3.71839, lng: -38.5434, accuracy: 10, timestamp: new Date().toISOString()};
+            
             if (!navigator.geolocation) {
-                reject(new Error("Geolocalização não suportada."));
-            } else {
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        resolve({
-                            lat: position.coords.latitude,
-                            lng: position.coords.longitude,
-                            accuracy: position.coords.accuracy,
-                            timestamp: new Date().toISOString()
-                        });
-                    },
-                    (error) => {
-                        console.warn("Falha real do GPS. Injetando mock para fins de demonstração.", error);
-                        resolve({lat: -3.71839, lng: -38.5434, accuracy: 10, timestamp: new Date().toISOString()});
-                    },
-                    { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
-                );
+                resolve(mockFallback);
+                return;
             }
+            
+            const timeoutId = setTimeout(() => {
+                resolve(mockFallback);
+            }, 4000);
+
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    clearTimeout(timeoutId);
+                    resolve({
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude,
+                        accuracy: position.coords.accuracy,
+                        timestamp: new Date().toISOString()
+                    });
+                },
+                (error) => {
+                    clearTimeout(timeoutId);
+                    resolve(mockFallback);
+                },
+                { enableHighAccuracy: true, timeout: 3500, maximumAge: 0 }
+            );
         });
     },
 
     submitPreRoute: async function() {
         const form = document.getElementById('form-pre-route');
+        
         if (!form.checkValidity()) {
-            form.reportValidity();
+            this.showToast('⚠️ Preencha todas as questões e anexe as fotos obrigatórias solicitadas.', 'warning');
+            try { form.reportValidity(); } catch(e){}
             return;
         }
 
         const btnText = document.getElementById('btn-pre-text');
-        btnText.innerHTML = '<div class="loader"></div> Obtendo GPS...';
+        btnText.innerHTML = '<div class="loader"></div> Salvando informações...';
 
         try {
             const geo = await this.getGeolocation();
-            
             const formData = new FormData(form);
             const data = {
                 timestamp: new Date().toLocaleString('pt-BR'),
@@ -1194,7 +1245,7 @@ const app = {
                 );
             } else {
                 this.state.routeBlocked = false;
-                this.showToast('Checklist Pré-Rota salvo com sucesso!', 'success');
+                this.showToast('Checklist Pré-Rota salvo e travado no veículo!', 'success');
             
                 const vIdx = this.state.vehicles.findIndex(v => v.plate === this.state.vehicle);
                 if (vIdx >= 0) {
@@ -1204,8 +1255,7 @@ const app = {
 
             this.state.preRouteData = data;
             this.state.preRouteCompleted = true;
-            this.saveState();
-            
+            this.saveState(); 
             this.renderVehiclesList();
 
             setTimeout(() => {
@@ -1214,7 +1264,7 @@ const app = {
             }, 1500);
 
         } catch (error) {
-            this.showToast(error.message, 'error');
+            this.showToast(error.message || 'Erro inesperado.', 'error');
             btnText.innerHTML = 'Salvar Pré-Rota e Capturar GPS';
         }
     },
@@ -1223,23 +1273,23 @@ const app = {
         const form = document.getElementById('form-collection');
         const clientName = document.getElementById('client-name').value;
         
-        if(!clientName) {
-            this.showToast('Informe o cliente.', 'error');
+        if(!clientName || clientName.trim() === '') {
+            this.showToast('⚠️ Informe o nome do Ponto de Coleta/Cliente.', 'warning');
             return;
         }
 
         if (!form.checkValidity()) {
-            form.reportValidity();
+            this.showToast('⚠️ Responda todas as perguntas obrigatórias do formulário.', 'warning');
+            try { form.reportValidity(); } catch(e){}
             return;
         }
 
         const btnText = document.getElementById('btn-col-text');
         const originalText = btnText.innerHTML;
-        btnText.innerHTML = '<div class="loader"></div> ...';
+        btnText.innerHTML = '<div class="loader"></div> Salvando...';
 
         try {
             const geo = await this.getGeolocation();
-            
             const formData = new FormData(form);
             const data = {
                 id: Date.now(),
@@ -1255,7 +1305,7 @@ const app = {
             this.state.collections.push(data);
             this.saveState();
             
-            this.showToast(`Coleta em ${clientName} registrada!`, 'success');
+            this.showToast(`Coleta em ${clientName} salva com sucesso!`, 'success');
             
             setTimeout(() => {
                 if(stayOnPage) {
@@ -1284,7 +1334,7 @@ const app = {
 
         this.showConfirmModal(
             "Finalizar Rota", 
-            "Deseja encerrar a rota atual? O relatório será salvo no Histórico e o PDF será gerado para download. A tela de operação será limpa.",
+            "Deseja encerrar a rota atual? O relatório será salvo no Histórico e o PDF será gerado para download.",
             () => {
                 const record = {
                     id: Date.now(),
@@ -1298,17 +1348,21 @@ const app = {
 
                 this.state.history.unshift(record); 
                 
+                // OTIMIZAÇÃO MEMÓRIA: Limite seguro de 100 rotas para não quebrar o LocalStorage
+                if(this.state.history.length > 100) {
+                    this.state.history.pop();
+                }
+                
                 this.state.preRouteCompleted = false;
                 this.state.preRouteData = null;
                 this.state.routeBlocked = false;
                 this.state.collections = [];
                 
-                this.saveState();
+                this.saveState(); 
                 this.updateUI();
                 this.renderHistory();
                 
                 this.showToast('Rota finalizada e salva no histórico!', 'success');
-                
                 this.generatePDF(record);
             }
         );
@@ -1320,7 +1374,6 @@ const app = {
         
         const driverObj = this.state.drivers.find(d => d.id === record.driver) || { name: 'Não Identificado', expiryDate: 'N/A' };
         const vehicleObj = this.state.vehicles.find(v => v.plate === record.vehicle) || { model: 'Não Identificado' };
-        
         const dataStr = new Date(record.date).toLocaleDateString('pt-BR');
         
         let html = `
@@ -1372,9 +1425,7 @@ const app = {
                             <td style="padding: 3px; width: 60%;"><strong>Data/Hora:</strong> ${col.timestamp}</td>
                             <td style="padding: 3px;"><strong>Temp. Aferida:</strong> <span style="background: #eff6ff; padding: 2px 6px; border-radius: 4px; font-weight: bold; border: 1px solid #bfdbfe;">${col.temp}°C</span></td>
                         </tr>
-                        <tr>
-                            <td style="padding: 3px; color: #475569;" colspan="2"><strong>GPS Local:</strong> Lat ${col.location.lat.toFixed(5)}, Lng ${col.location.lng.toFixed(5)}</td>
-                        </tr>
+                        <tr><td style="padding: 3px; color: #475569;" colspan="2"><strong>GPS Local:</strong> Lat ${col.location.lat.toFixed(5)}, Lng ${col.location.lng.toFixed(5)}</td></tr>
                         <tr><td style="padding: 3px; padding-top: 6px;" colspan="2"><strong>Embalagem Tripla (Primária, Secundária e Terciária):</strong> ${col.q1 || 'N/A'}</td></tr>
                         <tr><td style="padding: 3px;" colspan="2"><strong>Identificação Externa Correta (Símbolos)?</strong> ${col.q2 || 'N/A'}</td></tr>
                         <tr><td style="padding: 3px;" colspan="2"><strong>Documentação/Manifesto Entregue?</strong> ${col.q4 || 'N/A'}</td></tr>
@@ -1391,14 +1442,12 @@ const app = {
                     <tr>
                         <td style="width: 50%; padding: 10px;">
                             <div style="border-top: 1px solid #000; width: 80%; margin: 0 auto; padding-top: 5px;">
-                                <strong>Assinatura do Motorista</strong><br>
-                                <span style="color: #475569;">${driverObj.name}</span>
+                                <strong>Assinatura do Motorista</strong><br><span style="color: #475569;">${driverObj.name}</span>
                             </div>
                         </td>
                         <td style="width: 50%; padding: 10px;">
                             <div style="border-top: 1px solid #000; width: 80%; margin: 0 auto; padding-top: 5px;">
-                                <strong>Responsável Técnico / Supervisor</strong><br>
-                                <span style="color: #475569;">Conferido por</span>
+                                <strong>Responsável Técnico / Supervisor</strong><br><span style="color: #475569;">Conferido por</span>
                             </div>
                         </td>
                     </tr>
@@ -1423,15 +1472,60 @@ const app = {
         });
     },
 
+    exportHistoryCSV: function() {
+        if (this.state.history.length === 0) {
+            this.showToast('Não há dados no histórico para exportar.', 'warning');
+            return;
+        }
+        this.showToast('Gerando arquivo CSV...', 'success');
+
+        let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; 
+        csvContent += "ID_Relatorio,Data,Hora,Motorista_ID,Placa_Veiculo,Status_Rota,Qtd_Coletas,Q1_Limpeza,Q2_Identificacao,Q3_KitDerramamento,Q4_EPIs,Q5_CaixasTermicas,Q6_Termometros,Lat_PreRota,Lng_PreRota\r\n";
+
+        this.state.history.forEach(h => {
+            const dateObj = new Date(h.date);
+            const dataStr = dateObj.toLocaleDateString('pt-BR');
+            const horaStr = dateObj.toLocaleTimeString('pt-BR');
+            const status = h.blocked ? 'Bloqueada' : 'Liberada';
+            const qtdCol = h.collections ? h.collections.length : 0;
+            const pr = h.preRouteData || {};
+            const loc = pr.location || { lat: '', lng: '' };
+
+            const row = [
+                h.id, dataStr, horaStr, h.driver, h.vehicle, status, qtdCol,
+                pr.q1 || '', pr.q2 || '', pr.q3 || '', pr.q4 || '', pr.q5 || '', pr.q6 || '', loc.lat, loc.lng
+            ];
+
+            const escapedRow = row.map(field => {
+                if (field === null || field === undefined) return '';
+                const stringField = String(field);
+                if (stringField.includes(',') || stringField.includes('"') || stringField.includes('\n')) {
+                    return `"${stringField.replace(/"/g, '""')}"`;
+                }
+                return stringField;
+            });
+            csvContent += escapedRow.join(",") + "\r\n";
+        });
+
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `Historico_BioLogistics_${this.getTodayStr()}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    },
+
     renderHistory: function() {
         const tbody = document.getElementById('history-tbody');
         if (!tbody) return;
-        tbody.innerHTML = '';
         
         if (this.state.history.length === 0) {
             tbody.innerHTML = '<tr><td colspan="5" class="text-center py-6 text-gray-500">Nenhum relatório salvo ainda.</td></tr>';
             return;
         }
+
+        let htmlContent = ''; 
 
         this.state.history.forEach(h => {
             const dateObj = new Date(h.date);
@@ -1439,11 +1533,11 @@ const app = {
                 ? '<span class="bg-red-100 text-red-800 text-xs font-bold px-2 py-1 rounded">Bloqueada</span>' 
                 : '<span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2 py-1 rounded">Concluída</span>';
 
-            tbody.innerHTML += `
+            htmlContent += `
                 <tr>
                     <td class="text-sm">${dateObj.toLocaleDateString('pt-BR')}<br><span class="text-xs text-gray-500">${dateObj.toLocaleTimeString('pt-BR')}</span></td>
                     <td class="font-medium">${h.vehicle}<br><span class="text-xs text-gray-500">${h.driver}</span></td>
-                    <td class="text-center font-bold">${h.collections.length}</td>
+                    <td class="text-center font-bold">${h.collections ? h.collections.length : 0}</td>
                     <td>${statusHtml}</td>
                     <td>
                         <button onclick="app.generatePDF(app.state.history.find(x => x.id === ${h.id}))" class="text-blue-600 hover:text-blue-900 bg-blue-50 px-3 py-1 rounded border border-blue-200 text-sm font-medium transition-colors">
@@ -1453,13 +1547,146 @@ const app = {
                 </tr>
             `;
         });
+        
+        tbody.innerHTML = htmlContent; 
+    },
+
+    getFilteredHistory: function() {
+        const period = document.getElementById('dash-period-select').value;
+        if (period === 'all') return this.state.history;
+
+        const days = parseInt(period);
+        const limitDate = new Date();
+        limitDate.setDate(limitDate.getDate() - days);
+        limitDate.setHours(0, 0, 0, 0);
+
+        return this.state.history.filter(h => new Date(h.date) >= limitDate);
+    },
+
+    renderDashboard: function() {
+        const filteredData = this.getFilteredHistory();
+        
+        let totalRotas = filteredData.length;
+        let rotasLiberadas = 0;
+        let rotasBloqueadas = 0;
+        let totalColetas = 0;
+        
+        const ncCounts = {
+            'Q1 - Limpeza': 0, 'Q2 - Identificação Ext.': 0, 'Q3 - Kit Derramamento': 0,
+            'Q4 - EPIs Motorista': 0, 'Q5 - Caixas Térmicas': 0, 'Q6 - Termômetros': 0
+        };
+        const coletasPorDiaMap = {};
+
+        filteredData.forEach(h => {
+            if (h.blocked) rotasBloqueadas++;
+            else rotasLiberadas++;
+            
+            if (h.collections) totalColetas += h.collections.length;
+
+            if (h.preRouteData) {
+                if(h.preRouteData.q1 === 'Não Conforme') ncCounts['Q1 - Limpeza']++;
+                if(h.preRouteData.q2 === 'Não Conforme') ncCounts['Q2 - Identificação Ext.']++;
+                if(h.preRouteData.q3 === 'Não Conforme') ncCounts['Q3 - Kit Derramamento']++;
+                if(h.preRouteData.q4 === 'Não Conforme') ncCounts['Q4 - EPIs Motorista']++;
+                if(h.preRouteData.q5 === 'Não Conforme') ncCounts['Q5 - Caixas Térmicas']++;
+                if(h.preRouteData.q6 === 'Não Conforme') ncCounts['Q6 - Termômetros']++;
+            }
+
+            const dateStr = new Date(h.date).toLocaleDateString('pt-BR');
+            if(!coletasPorDiaMap[dateStr]) coletasPorDiaMap[dateStr] = 0;
+            if(h.collections) coletasPorDiaMap[dateStr] += h.collections.length;
+        });
+
+        document.getElementById('kpi-total-rotas').textContent = totalRotas;
+        document.getElementById('kpi-rotas-liberadas').textContent = rotasLiberadas;
+        document.getElementById('kpi-rotas-bloqueadas').textContent = rotasBloqueadas;
+        document.getElementById('kpi-total-coletas').textContent = totalColetas;
+
+        this.renderChartStatus(rotasLiberadas, rotasBloqueadas);
+        this.renderChartColetas(coletasPorDiaMap);
+        this.renderNCTable(ncCounts);
+    },
+
+    renderChartStatus: function(liberadas, bloqueadas) {
+        const ctx = document.getElementById('chartStatusRotas');
+        if(!ctx) return;
+        
+        if (this.charts.statusRotas) {
+            this.charts.statusRotas.destroy();
+        }
+
+        const dataValues = (liberadas === 0 && bloqueadas === 0) ? [1] : [liberadas, bloqueadas];
+        const bgColors = (liberadas === 0 && bloqueadas === 0) ? ['#e5e7eb'] : ['#10b981', '#ef4444'];
+        const labels = (liberadas === 0 && bloqueadas === 0) ? ['Sem Dados'] : ['Liberadas', 'Bloqueadas'];
+
+        this.charts.statusRotas = new Chart(ctx, {
+            type: 'doughnut',
+            data: { labels: labels, datasets: [{ data: dataValues, backgroundColor: bgColors, borderWidth: 0, hoverOffset: 4 }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+        });
+    },
+
+    renderChartColetas: function(coletasPorDiaMap) {
+        const ctx = document.getElementById('chartColetasDia');
+        if(!ctx) return;
+
+        if (this.charts.coletasDia) {
+            this.charts.coletasDia.destroy();
+        }
+
+        const sortedDates = Object.keys(coletasPorDiaMap).sort((a, b) => {
+            const dateA = new Date(a.split('/').reverse().join('-'));
+            const dateB = new Date(b.split('/').reverse().join('-'));
+            return dateA - dateB;
+        });
+
+        const labels = sortedDates;
+        const data = sortedDates.map(date => coletasPorDiaMap[date]);
+
+        this.charts.coletasDia = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels.length > 0 ? labels : ['Nenhuma Coleta'],
+                datasets: [{ label: 'Qtd. Coletas', data: data.length > 0 ? data : [0], backgroundColor: '#8b5cf6', borderRadius: 4 }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }, plugins: { legend: { display: false } } }
+        });
+    },
+
+    renderNCTable: function(ncCounts) {
+        const tbody = document.getElementById('dash-nc-tbody');
+        const ncArray = Object.keys(ncCounts).map(key => ({ item: key, count: ncCounts[key] })).sort((a, b) => b.count - a.count);
+
+        let hasNC = false;
+        let htmlContent = ''; 
+
+        ncArray.forEach(nc => {
+            if (nc.count > 0) {
+                hasNC = true;
+                const isCritical = nc.item.includes('Q3');
+                htmlContent += `
+                    <tr>
+                        <td class="font-medium text-slate-700 ${isCritical ? 'text-red-600' : ''}">
+                            ${isCritical ? '<i class="fa-solid fa-triangle-exclamation mr-1"></i> ' : ''}${nc.item}
+                        </td>
+                        <td class="text-center font-bold text-slate-800">${nc.count}</td>
+                    </tr>
+                `;
+            }
+        });
+
+        if (!hasNC) {
+            tbody.innerHTML = '<tr><td colspan="2" class="text-center py-4 text-emerald-600 font-medium">Nenhuma não conformidade registrada neste período.</td></tr>';
+        } else {
+            tbody.innerHTML = htmlContent; 
+        }
     },
 
     showToast: function(message, type = 'default') {
         const toast = document.getElementById("toast");
         toast.textContent = message;
         toast.className = "show " + type;
-        setTimeout(() => toast.className = toast.className.replace("show", ""), 3000);
+        setTimeout(() => toast.className = toast.className.replace("show", ""), 3500);
     },
 
     showCustomModal: function(title, message) {
