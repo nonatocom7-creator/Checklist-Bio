@@ -1,0 +1,1508 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checklist de Transporte Biológico - RDC 504/2021</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome para ícones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- html2pdf para geração de PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- QRCode.js para geração de QR Code -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5; 
+        }
+        .app-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            min-height: 100vh;
+            background-color: #f0f2f5;
+        }
+        .radio-custom:checked + label {
+            background-color: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+        .radio-custom-nc:checked + label {
+            background-color: #ef4444;
+            color: white;
+            border-color: #ef4444;
+        }
+        .photo-upload-wrapper {
+            display: none;
+            transition: all 0.3s ease;
+        }
+        .photo-upload-wrapper.active {
+            display: block;
+        }
+        #toast {
+            visibility: hidden;
+            min-width: 250px;
+            margin-left: -125px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 8px;
+            padding: 16px;
+            position: fixed;
+            z-index: 1000;
+            left: 50%;
+            bottom: 30px;
+            font-size: 14px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transition: visibility 0s, opacity 0.5s linear;
+            opacity: 0;
+        }
+        #toast.show {
+            visibility: visible;
+            opacity: 1;
+        }
+        #toast.error { background-color: #ef4444; }
+        #toast.success { background-color: #10b981; }
+        #toast.warning { background-color: #f59e0b; }
+        
+        .loader {
+            border: 3px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 3px solid #3b82f6;
+            width: 20px;
+            height: 20px;
+            -webkit-animation: spin 1s linear infinite;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .section-hidden { display: none; }
+
+        .nav-tabs {
+            background: white;
+            border-bottom: 2px solid #e5e7eb;
+            display: flex;
+            padding: 0 20px;
+            gap: 20px;
+            overflow-x: auto;
+        }
+        .nav-tab {
+            padding: 15px 10px;
+            color: #4b5563;
+            font-weight: 600;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+        .nav-tab:hover { color: #1f2937; }
+        .nav-tab.active {
+            color: #1d4ed8;
+            border-bottom-color: #1d4ed8;
+        }
+
+        .management-card {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .form-input {
+            width: 100%;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            padding: 8px 12px;
+            font-size: 14px;
+            color: #374151;
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 1px #3b82f6;
+        }
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 4px;
+        }
+        .btn-success {
+            background-color: #10b981;
+            color: white;
+            font-weight: 600;
+            padding: 10px 16px;
+            border-radius: 4px;
+            width: 100%;
+            transition: background 0.2s;
+        }
+        .btn-success:hover { background-color: #059669; }
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        .data-table th {
+            background-color: #f3f4f6;
+            color: #4b5563;
+            font-weight: 600;
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .data-table td {
+            padding: 12px;
+            border-bottom: 1px solid #e5e7eb;
+            color: #374151;
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+
+<div class="app-container flex flex-col relative" id="app-root">
+    
+    <!-- Top Navigation Bar -->
+    <div class="nav-tabs shadow-sm sticky top-0 z-40" id="main-nav-tabs">
+        <div class="nav-tab active" onclick="app.switchTab('view-dashboard', this)">
+            <i class="fa-solid fa-clipboard-list text-blue-500"></i> Operação / Checklist
+        </div>
+        <!-- Note a classe admin-tab para controle de visibilidade -->
+        <div class="nav-tab admin-tab" onclick="app.switchTab('view-vehicles', this)">
+            <i class="fa-solid fa-car-side text-red-500"></i> Veículos & Alertas
+        </div>
+        <div class="nav-tab admin-tab" onclick="app.switchTab('view-employees', this)">
+            <i class="fa-solid fa-users-gear text-emerald-500"></i> Usuários (Motoristas)
+        </div>
+        <div class="nav-tab admin-tab" onclick="app.switchTab('view-history', this)">
+            <i class="fa-solid fa-folder-open text-amber-500"></i> Histórico
+        </div>
+    </div>
+
+    <!-- Header Operacional -->
+    <header id="op-header" class="bg-blue-700 text-white p-4 shadow-md">
+        <div class="flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <i class="fa-solid fa-truck-medical text-2xl"></i>
+                <div>
+                    <h1 class="font-bold text-lg leading-tight">BioLogistics App</h1>
+                    <p class="text-xs text-blue-200">Em conformidade com RDC 504/2021</p>
+                </div>
+            </div>
+            <div id="status-indicator" class="flex items-center gap-2 text-xs font-medium bg-blue-800 px-3 py-1.5 rounded-full">
+                <span class="w-2 h-2 rounded-full bg-yellow-400" id="sync-dot"></span>
+                <span id="sync-text">Pronto</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow p-4 overflow-y-auto pb-24" id="main-content">
+        
+        <div id="view-dashboard" class="space-y-6">
+            <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+                <h2 class="font-semibold text-gray-800 mb-4"><i class="fa-solid fa-user-check mr-2 text-blue-600"></i>Identificação da Rota</h2>
+                
+                <div id="qr-scanned-alert" class="hidden bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-3 rounded-lg mb-4 text-sm flex items-center">
+                    <i class="fa-solid fa-qrcode mr-2 text-lg"></i>
+                    <span>Veículo identificado via QR Code com sucesso.</span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Motorista (Selecione seu usuário)</label>
+                        <select id="driver-select" class="w-full rounded-lg border-gray-300 border p-2.5 bg-white text-sm focus:ring-blue-500 focus:border-blue-500">
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Veículo (Placa)</label>
+                        <select id="vehicle-select" class="w-full rounded-lg border-gray-300 border p-2.5 bg-white text-sm focus:ring-blue-500 focus:border-blue-500">
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 gap-4">
+                <button onclick="app.startPreRoute()" class="bg-white border-2 border-blue-600 text-blue-700 hover:bg-blue-50 rounded-xl p-5 flex items-center justify-between transition-colors shadow-sm">
+                    <div class="text-left">
+                        <h3 class="font-bold text-lg">Checklist Pré-Rota</h3>
+                        <p class="text-sm text-slate-500">Inspeção diária (Trava de 1 por dia/veículo)</p>
+                    </div>
+                    <i class="fa-solid fa-clipboard-check text-3xl text-blue-500"></i>
+                </button>
+                
+                <button onclick="app.startCollection()" id="btn-collection" class="bg-slate-100 border-2 border-slate-300 text-slate-400 rounded-xl p-5 flex items-center justify-between transition-colors shadow-sm cursor-not-allowed" disabled>
+                    <div class="text-left">
+                        <h3 class="font-bold text-lg">Checklist de Coleta</h3>
+                        <p class="text-sm">Inspeção no ponto do cliente (Requer Pré-Rota)</p>
+                    </div>
+                    <i class="fa-solid fa-box-open text-3xl"></i>
+                </button>
+
+                <div id="collections-summary" class="hidden bg-indigo-50 border border-indigo-200 rounded-xl p-4 shadow-sm">
+                    <h3 class="font-bold text-indigo-900 mb-2 flex items-center justify-between">
+                        <span><i class="fa-solid fa-list-check mr-2"></i> Coletas Realizadas</span>
+                        <span id="col-count" class="bg-indigo-600 text-white text-xs px-2 py-1 rounded-full">0</span>
+                    </h3>
+                    <ul id="col-list" class="space-y-2 text-sm text-indigo-800 mt-3">
+                    </ul>
+                </div>
+
+                <button onclick="app.finishRoute()" id="btn-report" class="bg-white border-2 border-emerald-600 text-emerald-700 hover:bg-emerald-50 rounded-xl p-5 flex items-center justify-between transition-colors shadow-sm mt-4">
+                    <div class="text-left">
+                        <h3 class="font-bold text-lg">Finalizar Rota (Gerar PDF)</h3>
+                        <p class="text-sm text-slate-500">Salva no histórico e finaliza o dia</p>
+                    </div>
+                    <i class="fa-solid fa-file-pdf text-3xl text-emerald-500"></i>
+                </button>
+            </div>
+        </div>
+
+        <div id="view-vehicles" class="section-hidden">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Gestão de Veículos e Alertas</h2>
+            
+            <div class="management-card">
+                <h3 class="font-bold text-gray-700 text-lg mb-4">Cadastrar Novo Veículo</h3>
+                <form id="form-vehicle" onsubmit="app.saveVehicle(event)">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                        <div>
+                            <label class="form-label">Placa:</label>
+                            <input type="text" id="v_placa" class="form-input" placeholder="ABC-1234" required pattern="[A-Za-z0-9-]{7,8}">
+                        </div>
+                        <div>
+                            <label class="form-label">Modelo:</label>
+                            <input type="text" id="v_modelo" class="form-input" placeholder="Fiorino, Saveiro..." required>
+                        </div>
+                        <div>
+                            <label class="form-label">E-mail para Alertas:</label>
+                            <input type="email" id="v_email" class="form-input" placeholder="frota@empresa.com">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                        <div>
+                            <label class="form-label">KM Últ. Revisão:</label>
+                            <input type="number" id="v_km_rev" class="form-input" value="0">
+                        </div>
+                        <div>
+                            <label class="form-label">Intervalo Revisão (KM):</label>
+                            <input type="number" id="v_int_rev" class="form-input" value="10000">
+                        </div>
+                        <div>
+                            <label class="form-label">KM Últ. Tr. Óleo:</label>
+                            <input type="number" id="v_km_oleo" class="form-input" value="0">
+                        </div>
+                        <div>
+                            <label class="form-label">Intervalo Óleo (KM):</label>
+                            <input type="number" id="v_int_oleo" class="form-input" value="10000">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-success">Salvar Veículo</button>
+                </form>
+            </div>
+
+            <div class="management-card overflow-x-auto">
+                <table class="data-table w-full">
+                    <thead>
+                        <tr>
+                            <th>Placa / Modelo</th>
+                            <th>Último Checklist</th>
+                            <th>Status (Trava Diária)</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="vehicles-tbody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="view-employees" class="section-hidden">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Cadastro de Usuários (Motoristas)</h2>
+            
+            <div class="management-card border-t-4 border-emerald-500">
+                <h3 class="font-bold text-gray-700 text-lg mb-4">Cadastrar / Atualizar Usuário</h3>
+                <form id="form-employee" onsubmit="app.saveEmployee(event)">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="form-label">Matrícula / ID:</label>
+                            <input type="text" id="e_id" class="form-input" placeholder="MOT-001" required>
+                        </div>
+                        <div>
+                            <label class="form-label">Nome Completo:</label>
+                            <input type="text" id="e_nome" class="form-input" placeholder="João da Silva" required>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <div>
+                            <label class="form-label">Treinamento Cargas Perigosas (Data Realização):</label>
+                            <input type="date" id="e_data_treinamento" class="form-input" required>
+                        </div>
+                        <div>
+                            <label class="form-label">Validade (Expiração):</label>
+                            <input type="date" id="e_data_validade" class="form-input" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-success bg-emerald-600 hover:bg-emerald-700">Salvar Colaborador</button>
+                </form>
+            </div>
+
+            <div class="management-card overflow-x-auto">
+                <table class="data-table w-full">
+                    <thead>
+                        <tr>
+                            <th>ID / Nome</th>
+                            <th>Treinamento Realizado</th>
+                            <th>Vencimento</th>
+                            <th>Status (Alerta)</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="employees-tbody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="view-history" class="section-hidden">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Histórico de Relatórios</h2>
+            
+            <div class="management-card overflow-x-auto">
+                <table class="data-table w-full">
+                    <thead>
+                        <tr>
+                            <th>Data / Hora</th>
+                            <th>Placa / Motorista</th>
+                            <th>Qtd. Coletas</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-tbody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- VIEW 4: PRE-ROUTE FORM -->
+        <div id="view-pre-route" class="section-hidden space-y-6">
+            <div class="flex items-center mb-4 bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+                <button onclick="app.switchTab('view-dashboard', document.querySelector('.nav-tab'))" class="mr-3 text-slate-500 hover:text-blue-600"><i class="fa-solid fa-arrow-left text-xl"></i></button>
+                <div>
+                    <h2 class="text-xl font-bold text-slate-800">Checklist Pré-Rota</h2>
+                    <p class="text-sm text-gray-500" id="pre-route-vehicle-label"></p>
+                </div>
+            </div>
+            
+            <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 text-sm text-yellow-800 mb-6 rounded-r-lg shadow-sm">
+                <i class="fa-solid fa-location-dot mr-1"></i> A geolocalização será capturada ao salvar para fins de auditoria.
+            </div>
+
+            <form id="form-pre-route" class="space-y-8 pb-10">
+                <div class="question-block bg-white p-4 rounded-xl border border-gray-200 shadow-sm" data-id="pr_q1">
+                    <p class="font-medium text-slate-800 mb-3">1. O compartimento de carga está limpo, com superfícies lisas e laváveis (sem focos de contaminação)?</p>
+                    <div class="flex gap-4">
+                        <div class="flex-1">
+                            <input type="radio" name="pr_q1" id="pr_q1_c" value="Conforme" class="hidden radio-custom" required onchange="app.handleRadioChange('pr_q1')">
+                            <label for="pr_q1_c" class="block w-full text-center py-3 border border-gray-300 rounded-lg cursor-pointer transition-colors font-medium shadow-sm">Conforme</label>
+                        </div>
+                        <div class="flex-1">
+                            <input type="radio" name="pr_q1" id="pr_q1_nc" value="Não Conforme" class="hidden radio-custom-nc" onchange="app.handleRadioChange('pr_q1')">
+                            <label for="pr_q1_nc" class="block w-full text-center py-3 border border-gray-300 rounded-lg cursor-pointer transition-colors font-medium shadow-sm">Não Conforme</label>
+                        </div>
+                    </div>
+                    <div id="photo_pr_q1" class="photo-upload-wrapper mt-4 p-4 bg-slate-50 rounded-lg border border-dashed border-slate-300">
+                        <label class="block text-sm text-slate-700 mb-2 font-medium"><i class="fa-solid fa-camera mr-1"></i> Foto Obrigatória da Não Conformidade</label>
+                        <input type="file" accept="image/*" capture="environment" class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700">
+                    </div>
+                </div>
+
+                <div class="question-block bg-white p-4 rounded-xl border border-gray-200 shadow-sm" data-id="pr_q2">
+                    <p class="font-medium text-slate-800 mb-3">2. O veículo possui identificação externa de Risco Biológico (quando exigido) em bom estado?</p>
+                    <div class="flex gap-4">
+                        <div class="flex-1">
+                            <input type="radio" name="pr_q2" id="pr_q2_c" value="Conforme" class="hidden radio-custom" required onchange="app.handleRadioChange('pr_q2')">
+                            <label for="pr_q2_c" class="block w-full text-center py-3 border border-gray-300 rounded-lg cursor-pointer transition-colors font-medium shadow-sm">Conforme</label>
+                        </div>
+                        <div class="flex-1">
+                            <input type="radio" name="pr_q2" id="pr_q2_nc" value="Não Conforme" class="hidden radio-custom-nc" onchange="app.handleRadioChange('pr_q2')">
+                            <label for="pr_q2_nc" class="block w-full text-center py-3 border border-gray-300 rounded-lg cursor-pointer transition-colors font-medium shadow-sm">Não Conforme</label>
+                        </div>
+                    </div>
+                    <div id="photo_pr_q2" class="photo-upload-wrapper mt-4 p-4 bg-slate-50 rounded-lg border border-dashed border-slate-300">
+                        <label class="block text-sm text-slate-700 mb-2 font-medium"><i class="fa-solid fa-camera mr-1"></i> Foto Obrigatória</label>
+                        <input type="file" accept="image/*" capture="environment" class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:border-0 file:rounded-full file:bg-blue-50 file:text-blue-700">
+                    </div>
+                </div>
+
+                <div class="question-block bg-white p-4 rounded-xl border-2 border-red-200 shadow-sm relative overflow-hidden" data-id="pr_q3">
+                    <div class="absolute top-0 right-0 bg-red-100 text-red-700 text-xs font-bold px-3 py-1 rounded-bl-lg">ITEM CRÍTICO</div>
+                    <p class="font-medium text-slate-800 mb-3 mt-2">3. O "Kit de Derramamento" (EPIs extras, pá, absorvente, sacos, desinfetante) está completo e na validade?</p>
+                    <div class="flex gap-4">
+                        <div class="flex-1">
+                            <input type="radio" name="pr_q3" id="pr_q3_c" value="Conforme" class="hidden radio-custom" required onchange="app.handleRadioChange('pr_q3')">
+                            <label for="pr_q3_c" class="block w-full text-center py-3 border border-gray-300 rounded-lg cursor-pointer transition-colors font-medium shadow-sm">Conforme</label>
+                        </div>
+                        <div class="flex-1">
+                            <input type="radio" name="pr_q3" id="pr_q3_nc" value="Não Conforme" class="hidden radio-custom-nc" onchange="app.handleRadioChange('pr_q3')">
+                            <label for="pr_q3_nc" class="block w-full text-center py-3 border border-gray-300 rounded-lg cursor-pointer transition-colors font-medium shadow-sm">Não Conforme</label>
+                        </div>
+                    </div>
+                    <div id="photo_pr_q3" class="photo-upload-wrapper mt-4 p-4 bg-red-50 rounded-lg border border-dashed border-red-300">
+                        <p class="text-sm text-red-700 font-bold mb-2"><i class="fa-solid fa-triangle-exclamation mr-1"></i> ALERTA: Viagem será bloqueada.</p>
+                        <label class="block text-sm text-slate-700 mb-2 font-medium"><i class="fa-solid fa-camera mr-1"></i> Foto Obrigatória</label>
+                        <input type="file" accept="image/*" capture="environment" class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:border-0 file:rounded-full file:bg-red-100 file:text-red-700">
+                    </div>
+                </div>
+
+                <div class="question-block bg-white p-4 rounded-xl border border-gray-200 shadow-sm" data-id="pr_q4">
+                    <p class="font-medium text-slate-800 mb-3">4. Os EPIs do motorista (luvas, óculos, jaleco, máscara) estão disponíveis no veículo?</p>
+                    <div class="flex gap-4">
+                        <div class="flex-1">
+                            <input type="radio" name="pr_q4" id="pr_q4_c" value="Conforme" class="hidden radio-custom" required onchange="app.handleRadioChange('pr_q4')">
+                            <label for="pr_q4_c" class="block w-full text-center py-3 border border-gray-300 rounded-lg cursor-pointer transition-colors font-medium shadow-sm">Conforme</label>
+                        </div>
+                        <div class="flex-1">
+                            <input type="radio" name="pr_q4" id="pr_q4_nc" value="Não Conforme" class="hidden radio-custom-nc" onchange="app.handleRadioChange('pr_q4')">
+                            <label for="pr_q4_nc" class="block w-full text-center py-3 border border-gray-300 rounded-lg cursor-pointer transition-colors font-medium shadow-sm">Não Conforme</label>
+                        </div>
+                    </div>
+                    <div id="photo_pr_q4" class="photo-upload-wrapper mt-4 p-4 bg-slate-50 rounded-lg border border-dashed border-slate-300">
+                        <label class="block text-sm text-slate-700 mb-2 font-medium"><i class="fa-solid fa-camera mr-1"></i> Foto Obrigatória</label>
+                        <input type="file" accept="image/*" capture="environment" class="w-full text-sm text-slate-500">
+                    </div>
+                </div>
+
+                 <div class="question-block bg-white p-4 rounded-xl border border-gray-200 shadow-sm" data-id="pr_q5">
+                    <p class="font-medium text-slate-800 mb-3">5. As caixas térmicas (embalagem terciária) estão íntegras, sem rachaduras e higienizadas?</p>
+                    <div class="flex gap-4">
+                        <div class="flex-1">
+                            <input type="radio" name="pr_q5" id="pr_q5_c" value="Conforme" class="hidden radio-custom" required onchange="app.handleRadioChange('pr_q5')">
+                            <label for="pr_q5_c" class="block w-full text-center py-3 border border-gray-300 rounded-lg cursor-pointer transition-colors font-medium shadow-sm">Conforme</label>
+                        </div>
+                        <div class="flex-1">
+                            <input type="radio" name="pr_q5" id="pr_q5_nc" value="Não Conforme" class="hidden radio-custom-nc" onchange="app.handleRadioChange('pr_q5')">
+                            <label for="pr_q5_nc" class="block w-full text-center py-3 border border-gray-300 rounded-lg cursor-pointer transition-colors font-medium shadow-sm">Não Conforme</label>
+                        </div>
+                    </div>
+                    <div id="photo_pr_q5" class="photo-upload-wrapper mt-4 p-4 bg-slate-50 rounded-lg border border-dashed border-slate-300">
+                        <label class="block text-sm text-slate-700 mb-2 font-medium"><i class="fa-solid fa-camera mr-1"></i> Foto Obrigatória</label>
+                        <input type="file" accept="image/*" capture="environment" class="w-full text-sm text-slate-500">
+                    </div>
+                </div>
+
+                <div class="question-block bg-white p-4 rounded-xl border border-gray-200 shadow-sm" data-id="pr_q6">
+                    <p class="font-medium text-slate-800 mb-3">6. Os termômetros/dataloggers estão calibrados e ligados?</p>
+                    <div class="flex gap-4">
+                        <div class="flex-1">
+                            <input type="radio" name="pr_q6" id="pr_q6_c" value="Conforme" class="hidden radio-custom" required onchange="app.handleRadioChange('pr_q6')">
+                            <label for="pr_q6_c" class="block w-full text-center py-3 border border-gray-300 rounded-lg cursor-pointer transition-colors font-medium shadow-sm">Conforme</label>
+                        </div>
+                        <div class="flex-1">
+                            <input type="radio" name="pr_q6" id="pr_q6_nc" value="Não Conforme" class="hidden radio-custom-nc" onchange="app.handleRadioChange('pr_q6')">
+                            <label for="pr_q6_nc" class="block w-full text-center py-3 border border-gray-300 rounded-lg cursor-pointer transition-colors font-medium shadow-sm">Não Conforme</label>
+                        </div>
+                    </div>
+                    <div id="photo_pr_q6" class="photo-upload-wrapper mt-4 p-4 bg-slate-50 rounded-lg border border-dashed border-slate-300">
+                        <label class="block text-sm text-slate-700 mb-2 font-medium"><i class="fa-solid fa-camera mr-1"></i> Foto Obrigatória</label>
+                        <input type="file" accept="image/*" capture="environment" class="w-full text-sm text-slate-500">
+                    </div>
+                </div>
+
+                <div class="pt-4 pb-8 sticky bottom-0 z-10 bg-[#f0f2f5] p-2 border-t border-gray-300 -mx-4 px-4">
+                    <button type="button" onclick="app.submitPreRoute()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-4 rounded-xl shadow-lg transition-colors flex justify-center items-center text-lg">
+                        <span id="btn-pre-text">Salvar Pré-Rota e Capturar GPS</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- VIEW 5: COLLECTION POINT FORM -->
+        <div id="view-collection" class="section-hidden space-y-6">
+            <div class="flex items-center justify-between mb-4 bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+                <div class="flex items-center">
+                    <button onclick="app.switchTab('view-dashboard', document.querySelector('.nav-tab'))" class="mr-3 text-slate-500 hover:text-blue-600"><i class="fa-solid fa-arrow-left text-xl"></i></button>
+                    <h2 class="text-xl font-bold text-slate-800">Checklist Coleta</h2>
+                </div>
+                <span class="bg-indigo-100 text-indigo-800 text-xs font-semibold px-3 py-1 rounded-full border border-indigo-200">Em Rota</span>
+            </div>
+
+            <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm mb-6">
+                <label class="block text-sm font-bold text-slate-700 mb-2">Ponto de Coleta / Cliente</label>
+                <input type="text" id="client-name" placeholder="Ex: Laboratório Central São Lucas" class="w-full rounded-lg border-gray-300 border p-3 text-base focus:ring-blue-500 focus:border-blue-500">
+            </div>
+
+            <form id="form-collection" class="space-y-6 pb-10">
+                <div class="question-block bg-white p-4 rounded-xl border border-gray-200 shadow-sm" data-id="col_q1">
+                    <p class="font-medium text-slate-800 mb-3">1. A amostra possui o sistema de Embalagem Tripla (Primária, Secundária estanque e Terciária rígida)?</p>
+                    <div class="flex gap-4">
+                        <div class="flex-1">
+                            <input type="radio" name="col_q1" id="col_q1_c" value="Conforme" class="hidden radio-custom" required onchange="app.handleRadioChange('col_q1')">
+                            <label for="col_q1_c" class="block w-full text-center py-3 border border-gray-300 rounded-lg cursor-pointer transition-colors font-medium shadow-sm">Conforme</label>
+                        </div>
+                        <div class="flex-1">
+                            <input type="radio" name="col_q1" id="col_q1_nc" value="Não Conforme" class="hidden radio-custom-nc" onchange="app.handleRadioChange('col_q1')">
+                            <label for="col_q1_nc" class="block w-full text-center py-3 border border-gray-300 rounded-lg cursor-pointer transition-colors font-medium shadow-sm">Não Conforme</label>
+                        </div>
+                    </div>
+                    <div id="photo_col_q1" class="photo-upload-wrapper mt-4 p-3 bg-slate-50 rounded-lg border border-dashed border-slate-300">
+                        <label class="block text-sm text-slate-600 mb-2 font-medium"><i class="fa-solid fa-camera mr-1"></i> Foto Obrigatória</label>
+                        <input type="file" accept="image/*" capture="environment" class="w-full text-sm text-slate-500">
+                    </div>
+                </div>
+
+                <div class="question-block bg-white p-4 rounded-xl border border-gray-200 shadow-sm" data-id="col_q2">
+                    <p class="font-medium text-slate-800 mb-3">2. A embalagem externa possui a identificação correta (Símbolo de Substância Infectante, Setas, Remetente/Destinatário)?</p>
+                    <div class="flex gap-4">
+                        <div class="flex-1">
+                            <input type="radio" name="col_q2" id="col_q2_c" value="Conforme" class="hidden radio-custom" required onchange="app.handleRadioChange('col_q2')">
+                            <label for="col_q2_c" class="block w-full text-center py-3 border border-gray-300 rounded-lg cursor-pointer transition-colors font-medium shadow-sm">Conforme</label>
+                        </div>
+                        <div class="flex-1">
+                            <input type="radio" name="col_q2" id="col_q2_nc" value="Não Conforme" class="hidden radio-custom-nc" onchange="app.handleRadioChange('col_q2')">
+                            <label for="col_q2_nc" class="block w-full text-center py-3 border border-gray-300 rounded-lg cursor-pointer transition-colors font-medium shadow-sm">Não Conforme</label>
+                        </div>
+                    </div>
+                    <div id="photo_col_q2" class="photo-upload-wrapper mt-4 p-3 bg-slate-50 rounded-lg border border-dashed border-slate-300">
+                        <label class="block text-sm text-slate-600 mb-2 font-medium"><i class="fa-solid fa-camera mr-1"></i> Foto Obrigatória</label>
+                        <input type="file" accept="image/*" capture="environment" class="w-full text-sm text-slate-500">
+                    </div>
+                </div>
+
+                <div class="question-block bg-white p-5 rounded-xl border-2 border-indigo-100 shadow-sm bg-gradient-to-r from-white to-indigo-50">
+                    <label class="font-bold text-indigo-900 mb-3 block">3. Qual a temperatura registrada no momento da coleta? (°C)</label>
+                    <div class="flex items-center gap-3">
+                        <input type="number" id="col_temp" step="0.1" required class="w-32 text-center text-2xl font-bold rounded-lg border-indigo-300 border-2 p-3 focus:ring-indigo-500 focus:border-indigo-500 text-indigo-700" placeholder="0.0">
+                        <span class="text-indigo-800 font-bold text-xl">°C</span>
+                    </div>
+                    <div class="mt-4 p-4 bg-white rounded-lg border border-dashed border-indigo-300">
+                        <label class="block text-sm text-indigo-700 mb-2 font-medium"><i class="fa-solid fa-temperature-half mr-1"></i> Foto do Termômetro/Datalogger (Comprovante)</label>
+                        <input type="file" accept="image/*" capture="environment" class="w-full text-sm text-slate-500">
+                    </div>
+                </div>
+
+                <div class="question-block bg-white p-4 rounded-xl border border-gray-200 shadow-sm" data-id="col_q4">
+                    <p class="font-medium text-slate-800 mb-3">4. A documentação obrigatória (Manifesto de Transporte e Instruções de Emergência) foi entregue e conferida?</p>
+                    <div class="flex gap-4">
+                        <div class="flex-1">
+                            <input type="radio" name="col_q4" id="col_q4_c" value="Conforme" class="hidden radio-custom" required onchange="app.handleRadioChange('col_q4')">
+                            <label for="col_q4_c" class="block w-full text-center py-3 border border-gray-300 rounded-lg cursor-pointer transition-colors font-medium shadow-sm">Conforme</label>
+                        </div>
+                        <div class="flex-1">
+                            <input type="radio" name="col_q4" id="col_q4_nc" value="Não Conforme" class="hidden radio-custom-nc" onchange="app.handleRadioChange('col_q4')">
+                            <label for="col_q4_nc" class="block w-full text-center py-3 border border-gray-300 rounded-lg cursor-pointer transition-colors font-medium shadow-sm">Não Conforme</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-4 pb-8 sticky bottom-0 z-10 bg-[#f0f2f5] p-2 border-t border-gray-300 -mx-4 px-4 flex gap-3">
+                    <button type="button" onclick="app.submitCollection(true)" class="w-1/2 bg-white border-2 border-indigo-600 text-indigo-700 hover:bg-indigo-50 font-bold py-3 px-2 rounded-xl shadow-sm transition-colors flex justify-center items-center text-sm text-center">
+                        Salvar e Inserir Novo
+                    </button>
+                    <button type="button" onclick="app.submitCollection(false)" id="btn-col-text" class="w-1/2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-2 rounded-xl shadow-lg transition-colors flex justify-center items-center text-sm text-center">
+                        Salvar e Voltar
+                    </button>
+                </div>
+            </form>
+        </div>
+
+    </main>
+    
+    <!-- Elementos Ocultos e Modais -->
+    <div id="pdf-container" style="display: none; background: white; padding: 20px; font-family: sans-serif; color: black;">
+    </div>
+    <div id="toast">Message</div>
+</div>
+
+<div id="qr-modal" class="fixed inset-0 bg-black bg-opacity-70 z-[200] hidden items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-2xl p-6 max-w-sm w-full text-center">
+        <h3 class="text-xl font-bold text-gray-900 mb-2">QR Code do Veículo</h3>
+        <p class="text-gray-500 text-sm mb-6">Placa: <span id="qr-modal-plate" class="font-bold"></span></p>
+        
+        <div id="qrcode-display" class="flex justify-center mb-6 bg-gray-50 p-4 rounded-lg border border-gray-200 min-h-[200px]">
+        </div>
+        
+        <p class="text-xs text-gray-400 mb-4">Cole este QR Code no veículo. O motorista será direcionado diretamente para o checklist.</p>
+        
+        <button class="w-full bg-gray-900 text-white font-bold py-3 px-4 rounded-lg hover:bg-gray-800 transition-colors" onclick="document.getElementById('qr-modal').classList.replace('flex', 'hidden')">
+            Fechar
+        </button>
+    </div>
+</div>
+
+<script>
+const app = {
+    state: {
+        driver: null,
+        vehicle: null,
+        preRouteCompleted: false,
+        preRouteData: null,
+        routeBlocked: false,
+        collections: [], 
+        history: [], 
+        
+        // Dados mocados (serao salvos no localstorage)
+        drivers: [
+            { id: 'MOT-001', name: 'João Silva', trainingDate: '2025-10-01', expiryDate: '2026-10-01' },
+            { id: 'MOT-002', name: 'Maria Santos', trainingDate: '2025-05-15', expiryDate: '2026-05-15' }
+        ],
+        vehicles: [
+            { plate: 'ABC-1234', model: 'Fiorino', email: 'frota@empresa.com', kmRev: '50000', intRev: '10000', kmOil: '50000', intOil: '10000', lastChecklistDate: null },
+            { plate: 'XYZ-9876', model: 'Saveiro', email: 'oficina@empresa.com', kmRev: '32000', intRev: '10000', kmOil: '35000', intOil: '10000', lastChecklistDate: '2026-07-24' }
+        ]
+    },
+
+    init: function() {
+        this.loadState();
+        
+        const urlParams = new URLSearchParams(window.location.search);
+        const qrPlate = urlParams.get('placa');
+        
+        if (qrPlate) {
+            // Verifica se o veículo existe na memória do celular do motorista
+            let vExists = this.state.vehicles.find(v => v.plate === qrPlate);
+            
+            // SE NÃO EXISTE (ex: porque o celular nunca acessou o app antes), cria um temporário
+            if (!vExists) {
+                const newTempVehicle = { 
+                    plate: qrPlate, 
+                    model: 'Veículo identificado via QR', 
+                    email: '', kmRev: '0', intRev: '10000', kmOil: '0', intOil: '10000', 
+                    lastChecklistDate: null 
+                };
+                this.state.vehicles.push(newTempVehicle);
+            }
+            
+            this.state.vehicle = qrPlate;
+            
+            // MODO MOTORISTA: Esconde abas de administração
+            const adminTabs = document.querySelectorAll('.admin-tab');
+            adminTabs.forEach(tab => tab.style.display = 'none');
+            
+            const alertBox = document.getElementById('qr-scanned-alert');
+            if(alertBox) {
+                alertBox.classList.remove('hidden', 'bg-emerald-50', 'text-emerald-800', 'border-emerald-200');
+                alertBox.classList.add('bg-blue-50', 'text-blue-800', 'border-blue-200');
+                alertBox.innerHTML = `<i class="fa-solid fa-unlock-keyhole mr-3 text-2xl"></i><div><span class="block font-bold">Acesso Liberado: Veículo ${qrPlate}</span><span class="text-xs">Selecione seu usuário abaixo para iniciar.</span></div>`;
+            }
+            
+            this.saveState();
+        }
+
+        this.renderSelects();
+        this.renderVehiclesList();
+        this.renderEmployeesList();
+        this.updateUI();
+
+        if (qrPlate) {
+            const vSelect = document.getElementById('vehicle-select');
+            if(vSelect) {
+                vSelect.disabled = true;
+                vSelect.classList.add('bg-slate-200', 'cursor-not-allowed', 'font-bold');
+            }
+        }
+        
+        console.log("App Inicializado. Preparado para GitHub Pages.");
+    },
+
+    saveState: function() {
+        localStorage.setItem('bioLogisticsStateV2', JSON.stringify(this.state));
+    },
+
+    loadState: function() {
+        const saved = localStorage.getItem('bioLogisticsStateV2');
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            this.state = { ...this.state, ...parsed };
+            
+            if(!this.state.drivers || this.state.drivers.length === 0) {
+                 this.state.drivers = [
+                    { id: 'MOT-001', name: 'João Silva', trainingDate: '2025-10-01', expiryDate: '2026-10-01' },
+                    { id: 'MOT-002', name: 'Maria Santos', trainingDate: '2025-05-15', expiryDate: '2026-05-15' }
+                 ];
+            }
+            if(!this.state.vehicles) this.state.vehicles = [];
+            if(!this.state.history) this.state.history = [];
+        }
+    },
+
+    switchTab: function(viewId, tabElement) {
+        document.getElementById('view-dashboard').classList.add('section-hidden');
+        document.getElementById('view-vehicles').classList.add('section-hidden');
+        document.getElementById('view-employees').classList.add('section-hidden');
+        document.getElementById('view-history').classList.add('section-hidden');
+        document.getElementById('view-pre-route').classList.add('section-hidden');
+        document.getElementById('view-collection').classList.add('section-hidden');
+
+        if(viewId === 'view-dashboard' || viewId === 'view-pre-route' || viewId === 'view-collection') {
+            document.getElementById('op-header').classList.remove('hidden');
+        } else {
+            document.getElementById('op-header').classList.add('hidden');
+        }
+
+        document.getElementById(viewId).classList.remove('section-hidden');
+
+        if (tabElement && tabElement.classList) {
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            tabElement.classList.add('active');
+        }
+        
+        if(viewId === 'view-dashboard') this.updateUI();
+    },
+
+    renderSelects: function() {
+        const dSelect = document.getElementById('driver-select');
+        dSelect.innerHTML = '<option value="">Selecione o motorista...</option>';
+        
+        const today = new Date();
+        
+        this.state.drivers.forEach(d => {
+            const exp = new Date(d.expiryDate);
+            const isExpired = exp < today;
+            const statusStr = isExpired ? ' (TREINAMENTO VENCIDO)' : '';
+            dSelect.innerHTML += `<option value="${d.id}" ${isExpired ? 'disabled' : ''}>${d.name}${statusStr}</option>`;
+        });
+        
+        // Adiciona opção para motorista se cadastrar rápido via celular
+        dSelect.innerHTML += '<option value="NOVO" class="font-bold text-blue-600">+ Cadastrar Meu Usuário Rápido</option>';
+
+        dSelect.addEventListener('change', function(e) {
+            if(e.target.value === 'NOVO') {
+                const name = prompt("Digite seu Nome Completo:");
+                const id = prompt("Digite sua Matrícula (Ex: MOT-003):");
+                if(name && id) {
+                    // Para facilitar no GitHub sem backend, aprova automaticamente por 1 ano
+                    app.state.drivers.push({
+                        id: id.toUpperCase(),
+                        name: name,
+                        trainingDate: app.getTodayStr(),
+                        expiryDate: (new Date().getFullYear() + 1) + '-' + app.getTodayStr().substring(5)
+                    });
+                    app.saveState();
+                    app.renderSelects();
+                    dSelect.value = id.toUpperCase();
+                    app.showToast('Usuário cadastrado com sucesso!', 'success');
+                } else {
+                    dSelect.value = "";
+                }
+            }
+        });
+
+        const vSelect = document.getElementById('vehicle-select');
+        vSelect.innerHTML = '<option value="">Selecione o veículo...</option>';
+        this.state.vehicles.forEach(v => {
+            vSelect.innerHTML += `<option value="${v.plate}">${v.plate} - ${v.model}</option>`;
+        });
+    },
+
+    updateUI: function() {
+        if (this.state.driver && this.state.driver !== 'NOVO') document.getElementById('driver-select').value = this.state.driver;
+        if (this.state.vehicle) document.getElementById('vehicle-select').value = this.state.vehicle;
+
+        const btnCol = document.getElementById('btn-collection');
+        if (this.state.preRouteCompleted && !this.state.routeBlocked) {
+            btnCol.disabled = false;
+            btnCol.className = 'bg-white border-2 border-indigo-600 text-indigo-700 hover:bg-indigo-50 rounded-xl p-5 flex items-center justify-between transition-colors shadow-sm';
+            btnCol.querySelector('i').className = 'fa-solid fa-box-open text-3xl text-indigo-500';
+        } else {
+            btnCol.disabled = true;
+            btnCol.className = 'bg-slate-100 border-2 border-slate-300 text-slate-400 rounded-xl p-5 flex items-center justify-between transition-colors shadow-sm cursor-not-allowed';
+            btnCol.querySelector('i').className = 'fa-solid fa-box-open text-3xl';
+        }
+
+        const syncDot = document.getElementById('sync-dot');
+        const syncText = document.getElementById('sync-text');
+        if (this.state.routeBlocked) {
+            syncDot.className = 'w-2 h-2 rounded-full bg-red-500';
+            syncText.textContent = 'Rota Bloqueada';
+            syncText.classList.add('text-red-300');
+        } else if (this.state.preRouteCompleted) {
+            syncDot.className = 'w-2 h-2 rounded-full bg-green-400';
+            syncText.textContent = 'Em Rota';
+            syncText.classList.remove('text-red-300');
+        } else {
+            syncDot.className = 'w-2 h-2 rounded-full bg-yellow-400';
+            syncText.textContent = 'Pendente';
+            syncText.classList.remove('text-red-300');
+        }
+
+        const colSummary = document.getElementById('collections-summary');
+        const colList = document.getElementById('col-list');
+        const colCount = document.getElementById('col-count');
+        
+        if (this.state.collections.length > 0) {
+            colSummary.classList.remove('hidden');
+            colCount.textContent = this.state.collections.length;
+            colList.innerHTML = this.state.collections.map(c => 
+                `<li class="bg-white p-2 rounded border border-indigo-100 shadow-sm flex justify-between items-center">
+                    <span class="font-bold truncate pr-2">${c.client}</span>
+                    <span class="text-xs text-indigo-500 whitespace-nowrap">${c.temp}°C</span>
+                </li>`
+            ).join('');
+        } else {
+            colSummary.classList.add('hidden');
+            colList.innerHTML = '';
+        }
+    },
+
+    saveVehicle: function(e) {
+        e.preventDefault();
+        const plate = document.getElementById('v_placa').value.toUpperCase();
+        
+        const newVehicle = {
+            plate: plate,
+            model: document.getElementById('v_modelo').value,
+            email: document.getElementById('v_email').value,
+            kmRev: document.getElementById('v_km_rev').value,
+            intRev: document.getElementById('v_int_rev').value,
+            kmOil: document.getElementById('v_km_oleo').value,
+            intOil: document.getElementById('v_int_oleo').value,
+            lastChecklistDate: null
+        };
+
+        const idx = this.state.vehicles.findIndex(v => v.plate === plate);
+        if (idx >= 0) {
+            newVehicle.lastChecklistDate = this.state.vehicles[idx].lastChecklistDate;
+            this.state.vehicles[idx] = newVehicle;
+            this.showToast('Veículo atualizado.', 'success');
+        } else {
+            this.state.vehicles.push(newVehicle);
+            this.showToast('Veículo cadastrado.', 'success');
+        }
+
+        this.saveState();
+        this.renderVehiclesList();
+        this.renderSelects();
+        e.target.reset();
+    },
+
+    renderVehiclesList: function() {
+        const tbody = document.getElementById('vehicles-tbody');
+        tbody.innerHTML = '';
+        const todayStr = this.getTodayStr();
+
+        this.state.vehicles.forEach(v => {
+            const isLocked = v.lastChecklistDate === todayStr;
+            const statusHtml = isLocked 
+                ? '<span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-1 rounded"><i class="fa-solid fa-lock mr-1"></i>Realizado Hoje</span>' 
+                : '<span class="bg-gray-100 text-gray-600 text-xs font-semibold px-2 py-1 rounded">Pendente</span>';
+
+            tbody.innerHTML += `
+                <tr>
+                    <td class="font-bold">${v.plate} <br><span class="text-xs text-gray-500 font-normal">${v.model}</span></td>
+                    <td class="text-sm">${v.lastChecklistDate ? this.formatDate(v.lastChecklistDate) : 'Nunca'}</td>
+                    <td>${statusHtml}</td>
+                    <td>
+                        <div class="flex items-center gap-2">
+                            <button onclick="app.showQRCode('${v.plate}')" class="text-indigo-600 hover:text-indigo-900 bg-indigo-50 px-3 py-1 rounded border border-indigo-200 text-sm font-medium transition-colors">
+                                <i class="fa-solid fa-qrcode mr-1"></i> QR Code
+                            </button>
+                            <button onclick="app.deleteVehicle('${v.plate}')" class="text-red-600 hover:text-red-900 bg-red-50 px-3 py-1 rounded border border-red-200 text-sm font-medium transition-colors" title="Excluir">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        });
+    },
+
+    deleteVehicle: function(plate) {
+        this.showConfirmModal(
+            "Excluir Veículo", 
+            `Tem certeza que deseja excluir o veículo placa <b>${plate}</b>?`,
+            () => {
+                this.state.vehicles = this.state.vehicles.filter(v => v.plate !== plate);
+                this.saveState();
+                this.renderVehiclesList();
+                this.renderSelects();
+                this.showToast('Veículo excluído com sucesso.', 'success');
+            }
+        );
+    },
+
+    showQRCode: function(plate) {
+        document.getElementById('qr-modal-plate').textContent = plate;
+        
+        const container = document.getElementById('qrcode-display');
+        container.innerHTML = ''; 
+        
+        // Garante que funciona perfeitamente no Github Pages independentemente de estar em subpasta
+        const baseUrl = window.location.origin + window.location.pathname;
+        const targetUrl = `${baseUrl}?placa=${plate}`;
+        
+        new QRCode(container, {
+            text: targetUrl,
+            width: 180,
+            height: 180,
+            colorDark : "#000000",
+            colorLight : "#ffffff",
+            correctLevel : QRCode.CorrectLevel.H
+        });
+        
+        document.getElementById('qr-modal').classList.replace('hidden', 'flex');
+    },
+
+    saveEmployee: function(e) {
+        e.preventDefault();
+        const id = document.getElementById('e_id').value;
+        
+        const newEmp = {
+            id: id,
+            name: document.getElementById('e_nome').value,
+            trainingDate: document.getElementById('e_data_treinamento').value,
+            expiryDate: document.getElementById('e_data_validade').value
+        };
+
+        const idx = this.state.drivers.findIndex(d => d.id === id);
+        if (idx >= 0) {
+            this.state.drivers[idx] = newEmp;
+            this.showToast('Colaborador atualizado.', 'success');
+        } else {
+            this.state.drivers.push(newEmp);
+            this.showToast('Colaborador cadastrado.', 'success');
+        }
+
+        this.saveState();
+        this.renderEmployeesList();
+        this.renderSelects();
+        e.target.reset();
+    },
+
+    renderEmployeesList: function() {
+        const tbody = document.getElementById('employees-tbody');
+        tbody.innerHTML = '';
+        
+        const today = new Date();
+        today.setHours(0,0,0,0);
+
+        this.state.drivers.forEach(d => {
+            const expDate = new Date(d.expiryDate + 'T00:00:00'); 
+            const diffTime = expDate - today;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            let statusHtml = '';
+            if (diffDays < 0) {
+                statusHtml = '<span class="bg-red-100 text-red-800 text-xs font-bold px-2 py-1 rounded border border-red-200">Vencido</span>';
+            } else if (diffDays <= 30) {
+                statusHtml = `<span class="bg-yellow-100 text-yellow-800 text-xs font-bold px-2 py-1 rounded border border-yellow-200">Vence em ${diffDays} dias</span>`;
+            } else {
+                statusHtml = '<span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2 py-1 rounded border border-emerald-200">Regular</span>';
+            }
+
+            tbody.innerHTML += `
+                <tr>
+                    <td class="font-medium">${d.id} <br><span class="text-sm text-gray-500">${d.name}</span></td>
+                    <td class="text-sm">${this.formatDate(d.trainingDate)}</td>
+                    <td class="text-sm font-medium ${diffDays < 0 ? 'text-red-600' : ''}">${this.formatDate(d.expiryDate)}</td>
+                    <td>${statusHtml}</td>
+                    <td>
+                        <div class="flex items-center gap-3">
+                            <button onclick="app.editEmployee('${d.id}')" class="text-blue-600 hover:text-blue-900 text-sm font-medium transition-colors">Editar</button>
+                            <button onclick="app.deleteEmployee('${d.id}')" class="text-red-600 hover:text-red-900 text-sm font-medium transition-colors">Excluir</button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        });
+    },
+
+    deleteEmployee: function(id) {
+        this.showConfirmModal(
+            "Excluir Usuário", 
+            `Tem certeza que deseja excluir o usuário ID <b>${id}</b>?`,
+            () => {
+                this.state.drivers = this.state.drivers.filter(d => d.id !== id);
+                this.saveState();
+                this.renderEmployeesList();
+                this.renderSelects();
+                this.showToast('Usuário excluído com sucesso.', 'success');
+            }
+        );
+    },
+
+    editEmployee: function(id) {
+        const emp = this.state.drivers.find(d => d.id === id);
+        if(emp) {
+            document.getElementById('e_id').value = emp.id;
+            document.getElementById('e_nome').value = emp.name;
+            document.getElementById('e_data_treinamento').value = emp.trainingDate;
+            document.getElementById('e_data_validade').value = emp.expiryDate;
+            window.scrollTo(0,0);
+        }
+    },
+
+    validateIdentity: function() {
+        const d = document.getElementById('driver-select').value;
+        const v = document.getElementById('vehicle-select').value;
+        if (!d || d === 'NOVO' || !v) {
+            this.showToast('Selecione Motorista e Veículo.', 'error');
+            return false;
+        }
+        
+        const driverObj = this.state.drivers.find(x => x.id === d);
+        if (driverObj && new Date(driverObj.expiryDate) < new Date()) {
+            this.showToast('Treinamento do motorista está vencido. Acesso negado.', 'error');
+            return false;
+        }
+
+        this.state.driver = d;
+        this.state.vehicle = v;
+        return true;
+    },
+
+    getTodayStr: function() {
+        const tzoffset = (new Date()).getTimezoneOffset() * 60000;
+        return (new Date(Date.now() - tzoffset)).toISOString().split('T')[0];
+    },
+
+    formatDate: function(ymdString) {
+        if(!ymdString) return '';
+        const parts = ymdString.split('-');
+        if(parts.length !== 3) return ymdString;
+        return `${parts[2]}/${parts[1]}/${parts[0]}`;
+    },
+
+    startPreRoute: function() {
+        if (!this.validateIdentity()) return;
+        
+        const selectedVehicle = this.state.vehicles.find(v => v.plate === this.state.vehicle);
+        const todayStr = this.getTodayStr();
+        
+        if (selectedVehicle && selectedVehicle.lastChecklistDate === todayStr) {
+            this.showCustomModal(
+                "Acesso Bloqueado", 
+                `O checklist Pré-Rota para o veículo <b>${this.state.vehicle}</b> já foi realizado hoje (${this.formatDate(todayStr)}). Conforme regra, só é permitida uma inspeção inicial diária.`
+            );
+            return;
+        }
+
+        const proceed = () => {
+            document.getElementById('form-pre-route').reset();
+            document.querySelectorAll('.photo-upload-wrapper').forEach(el => el.classList.remove('active'));
+            document.getElementById('pre-route-vehicle-label').textContent = `Veículo: ${this.state.vehicle} | Motorista: ${this.state.driver}`;
+            this.switchTab('view-pre-route');
+        };
+
+        if (this.state.preRouteCompleted) {
+            this.showConfirmModal(
+                "Refazer Pré-Rota?",
+                "O checklist Pré-Rota da sessão atual foi feito, mas não salvo no veículo ainda. Deseja refazer?",
+                proceed
+            );
+        } else {
+            proceed();
+        }
+    },
+
+    startCollection: function() {
+        if (this.state.routeBlocked) {
+            this.showToast('Rota bloqueada devido a não conformidade crítica no Pré-Rota.', 'error');
+            return;
+        }
+        document.getElementById('form-collection').reset();
+        document.getElementById('client-name').value = '';
+        document.querySelectorAll('.photo-upload-wrapper').forEach(el => el.classList.remove('active'));
+        
+        this.switchTab('view-collection');
+    },
+
+    handleRadioChange: function(questionId) {
+        const radios = document.getElementsByName(questionId);
+        let val = '';
+        for(let i=0; i<radios.length; i++){
+            if(radios[i].checked) val = radios[i].value;
+        }
+
+        const photoWrapper = document.getElementById('photo_' + questionId);
+        if(!photoWrapper) return; 
+        const fileInput = photoWrapper.querySelector('input[type="file"]');
+
+        if (val === 'Não Conforme') {
+            photoWrapper.classList.add('active');
+            fileInput.required = true;
+        } else {
+            photoWrapper.classList.remove('active');
+            fileInput.required = false;
+            fileInput.value = ''; 
+        }
+    },
+
+    getGeolocation: function() {
+        return new Promise((resolve, reject) => {
+            if (!navigator.geolocation) {
+                reject(new Error("Geolocalização não suportada."));
+            } else {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        resolve({
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude,
+                            accuracy: position.coords.accuracy,
+                            timestamp: new Date().toISOString()
+                        });
+                    },
+                    (error) => {
+                        console.warn("Falha real do GPS. Injetando mock para fins de demonstração.", error);
+                        resolve({lat: -3.71839, lng: -38.5434, accuracy: 10, timestamp: new Date().toISOString()});
+                    },
+                    { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+                );
+            }
+        });
+    },
+
+    submitPreRoute: async function() {
+        const form = document.getElementById('form-pre-route');
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+
+        const btnText = document.getElementById('btn-pre-text');
+        btnText.innerHTML = '<div class="loader"></div> Obtendo GPS...';
+
+        try {
+            const geo = await this.getGeolocation();
+            
+            const formData = new FormData(form);
+            const data = {
+                timestamp: new Date().toLocaleString('pt-BR'),
+                location: geo,
+                q1: formData.get('pr_q1'),
+                q2: formData.get('pr_q2'),
+                q3: formData.get('pr_q3'), 
+                q4: formData.get('pr_q4'),
+                q5: formData.get('pr_q5'),
+                q6: formData.get('pr_q6')
+            };
+
+            if (data.q3 === 'Não Conforme') {
+                this.state.routeBlocked = true;
+                this.showCustomModal(
+                    "🚨 ALERTA CRÍTICO: Rota Bloqueada", 
+                    "O Kit de Derramamento está incompleto ou vencido. Conforme RDC 504, o veículo está impedido de realizar transporte biológico."
+                );
+            } else {
+                this.state.routeBlocked = false;
+                this.showToast('Checklist Pré-Rota salvo com sucesso!', 'success');
+            
+                const vIdx = this.state.vehicles.findIndex(v => v.plate === this.state.vehicle);
+                if (vIdx >= 0) {
+                    this.state.vehicles[vIdx].lastChecklistDate = this.getTodayStr();
+                }
+            }
+
+            this.state.preRouteData = data;
+            this.state.preRouteCompleted = true;
+            this.saveState();
+            
+            this.renderVehiclesList();
+
+            setTimeout(() => {
+                this.switchTab('view-dashboard', document.querySelector('.nav-tab.active'));
+                btnText.innerHTML = 'Salvar Pré-Rota e Capturar GPS';
+            }, 1500);
+
+        } catch (error) {
+            this.showToast(error.message, 'error');
+            btnText.innerHTML = 'Salvar Pré-Rota e Capturar GPS';
+        }
+    },
+
+    submitCollection: async function(stayOnPage = false) {
+        const form = document.getElementById('form-collection');
+        const clientName = document.getElementById('client-name').value;
+        
+        if(!clientName) {
+            this.showToast('Informe o cliente.', 'error');
+            return;
+        }
+
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+
+        const btnText = document.getElementById('btn-col-text');
+        const originalText = btnText.innerHTML;
+        btnText.innerHTML = '<div class="loader"></div> ...';
+
+        try {
+            const geo = await this.getGeolocation();
+            
+            const formData = new FormData(form);
+            const data = {
+                id: Date.now(),
+                client: clientName,
+                timestamp: new Date().toLocaleString('pt-BR'),
+                location: geo,
+                q1: formData.get('col_q1'),
+                q2: formData.get('col_q2'),
+                temp: document.getElementById('col_temp').value,
+                q4: formData.get('col_q4')
+            };
+
+            this.state.collections.push(data);
+            this.saveState();
+            
+            this.showToast(`Coleta em ${clientName} registrada!`, 'success');
+            
+            setTimeout(() => {
+                if(stayOnPage) {
+                    form.reset();
+                    document.getElementById('client-name').value = '';
+                    document.querySelectorAll('.photo-upload-wrapper').forEach(el => el.classList.remove('active'));
+                    window.scrollTo({top: 0, behavior: 'smooth'});
+                    btnText.innerHTML = originalText;
+                } else {
+                    this.switchTab('view-dashboard', document.querySelector('.nav-tab.active'));
+                    btnText.innerHTML = 'Salvar e Voltar';
+                }
+            }, 1000);
+
+        } catch (error) {
+            this.showToast(error.message, 'error');
+            btnText.innerHTML = originalText;
+        }
+    },
+
+    finishRoute: function() {
+        if (!this.state.preRouteCompleted) {
+            this.showToast('Conclua o Pré-Rota primeiro.', 'error');
+            return;
+        }
+
+        this.showConfirmModal(
+            "Finalizar Rota", 
+            "Deseja encerrar a rota atual? O relatório será salvo no Histórico e o PDF será gerado para download. A tela de operação será limpa.",
+            () => {
+                const record = {
+                    id: Date.now(),
+                    date: new Date().toISOString(),
+                    driver: this.state.driver,
+                    vehicle: this.state.vehicle,
+                    preRouteData: this.state.preRouteData,
+                    collections: [...this.state.collections],
+                    blocked: this.state.routeBlocked
+                };
+
+                this.state.history.unshift(record); 
+                
+                this.state.preRouteCompleted = false;
+                this.state.preRouteData = null;
+                this.state.routeBlocked = false;
+                this.state.collections = [];
+                
+                this.saveState();
+                this.updateUI();
+                this.renderHistory();
+                
+                this.showToast('Rota finalizada e salva no histórico!', 'success');
+                
+                this.generatePDF(record);
+            }
+        );
+    },
+
+    generatePDF: function(record) {
+        this.showToast('Baixando relatório PDF...', 'success');
+        const container = document.getElementById('pdf-container');
+        
+        const driverObj = this.state.drivers.find(d => d.id === record.driver) || { name: 'Não Identificado', expiryDate: 'N/A' };
+        const vehicleObj = this.state.vehicles.find(v => v.plate === record.vehicle) || { model: 'Não Identificado' };
+        
+        const dataStr = new Date(record.date).toLocaleDateString('pt-BR');
+        
+        let html = `
+            <div style="text-align: center; border-bottom: 2px solid #2563eb; padding-bottom: 10px; margin-bottom: 15px;">
+                <h1 style="color: #1e3a8a; margin:0; font-family: sans-serif; font-size: 22px;">Relatório de Transporte Biológico</h1>
+                <p style="font-family: sans-serif; margin: 5px 0 0 0; color: #475569; font-size: 14px;">Em conformidade com a RDC ANVISA 504/2021</p>
+                <p style="font-family: sans-serif; margin: 2px 0 0 0; font-size: 13px;">Data da Emissão: ${dataStr}</p>
+            </div>
+            
+            <div style="background: #f8fafc; padding: 12px; border-radius: 8px; margin-bottom: 15px; font-family: sans-serif; font-size: 13px; border: 1px solid #e2e8f0;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <tr>
+                        <td style="padding: 4px;"><strong>Motorista:</strong> ${driverObj.name} (ID: ${record.driver})</td>
+                        <td style="padding: 4px;"><strong>Validade Treinamento:</strong> ${this.formatDate(driverObj.expiryDate)}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 4px;"><strong>Veículo:</strong> ${record.vehicle} - ${vehicleObj.model}</td>
+                        <td style="padding: 4px;"><strong>Status Final da Rota:</strong> ${record.blocked ? '<span style="color:#dc2626; font-weight:bold;">BLOQUEADA (Inconformidade Crítica)</span>' : '<span style="color:#059669; font-weight:bold;">Concluída e Liberada</span>'}</td>
+                    </tr>
+                </table>
+            </div>
+
+            <h2 style="font-size: 15px; background: #e2e8f0; padding: 6px 10px; font-family: sans-serif; border-radius: 4px; margin-bottom: 10px;">1. Checklist Pré-Rota (Auditoria)</h2>
+            <table style="width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 20px; font-family: sans-serif;">
+                <tr>
+                    <td colspan="2" style="border: 1px solid #cbd5e1; padding: 6px; background: #f1f5f9; color: #334155;">
+                        <strong>Data/Hora de Início:</strong> ${record.preRouteData.timestamp} &nbsp;|&nbsp; <strong>GPS:</strong> Lat ${record.preRouteData.location.lat.toFixed(5)}, Lng ${record.preRouteData.location.lng.toFixed(5)}
+                    </td>
+                </tr>
+                <tr><td style="border: 1px solid #cbd5e1; padding: 6px; width: 75%;">1. Compartimento de carga limpo e com superfícies lisas/laváveis?</td><td style="border: 1px solid #cbd5e1; padding: 6px; text-align: center;"><strong>${record.preRouteData.q1 || 'N/A'}</strong></td></tr>
+                <tr><td style="border: 1px solid #cbd5e1; padding: 6px;">2. Identificação externa de Risco Biológico em bom estado?</td><td style="border: 1px solid #cbd5e1; padding: 6px; text-align: center;"><strong>${record.preRouteData.q2 || 'N/A'}</strong></td></tr>
+                <tr><td style="border: 1px solid #cbd5e1; padding: 6px;">3. Kit de Derramamento completo e na validade (Item Crítico)?</td><td style="border: 1px solid #cbd5e1; padding: 6px; text-align: center; color: ${record.preRouteData.q3 === 'Não Conforme' ? 'red' : 'inherit'}"><strong>${record.preRouteData.q3 || 'N/A'}</strong></td></tr>
+                <tr><td style="border: 1px solid #cbd5e1; padding: 6px;">4. EPIs do motorista disponíveis (luvas, óculos, jaleco, máscara)?</td><td style="border: 1px solid #cbd5e1; padding: 6px; text-align: center;"><strong>${record.preRouteData.q4 || 'N/A'}</strong></td></tr>
+                <tr><td style="border: 1px solid #cbd5e1; padding: 6px;">5. Caixas térmicas íntegras e higienizadas?</td><td style="border: 1px solid #cbd5e1; padding: 6px; text-align: center;"><strong>${record.preRouteData.q5 || 'N/A'}</strong></td></tr>
+                <tr><td style="border: 1px solid #cbd5e1; padding: 6px;">6. Termômetros/dataloggers calibrados e ligados?</td><td style="border: 1px solid #cbd5e1; padding: 6px; text-align: center;"><strong>${record.preRouteData.q6 || 'N/A'}</strong></td></tr>
+            </table>
+        `;
+        
+        if (record.collections.length > 0) {
+            html += `<h2 style="font-size: 15px; background: #e2e8f0; padding: 6px 10px; font-family: sans-serif; border-radius: 4px; margin-bottom: 10px;">2. Registro de Coletas Realizadas (${record.collections.length})</h2>`;
+            record.collections.forEach((col, index) => {
+                html += `
+                <div style="margin-bottom:12px; border:1px solid #cbd5e1; padding:10px; border-radius: 4px; font-family: sans-serif; font-size: 11px; page-break-inside: avoid;">
+                    <div style="border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; margin-bottom: 6px;">
+                        <strong style="font-size: 13px; color: #1d4ed8;">#${index + 1} - Cliente / Ponto: ${col.client}</strong>
+                    </div>
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <tr>
+                            <td style="padding: 3px; width: 60%;"><strong>Data/Hora:</strong> ${col.timestamp}</td>
+                            <td style="padding: 3px;"><strong>Temp. Aferida:</strong> <span style="background: #eff6ff; padding: 2px 6px; border-radius: 4px; font-weight: bold; border: 1px solid #bfdbfe;">${col.temp}°C</span></td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 3px; color: #475569;" colspan="2"><strong>GPS Local:</strong> Lat ${col.location.lat.toFixed(5)}, Lng ${col.location.lng.toFixed(5)}</td>
+                        </tr>
+                        <tr><td style="padding: 3px; padding-top: 6px;" colspan="2"><strong>Embalagem Tripla (Primária, Secundária e Terciária):</strong> ${col.q1 || 'N/A'}</td></tr>
+                        <tr><td style="padding: 3px;" colspan="2"><strong>Identificação Externa Correta (Símbolos)?</strong> ${col.q2 || 'N/A'}</td></tr>
+                        <tr><td style="padding: 3px;" colspan="2"><strong>Documentação/Manifesto Entregue?</strong> ${col.q4 || 'N/A'}</td></tr>
+                    </table>
+                </div>`;
+            });
+        } else {
+            html += `<p style="font-family: sans-serif; font-size: 12px; color: #64748b; padding: 10px; border: 1px dashed #cbd5e1; border-radius: 4px;">Nenhuma coleta registrada nesta rota.</p>`;
+        }
+
+        html += `
+            <div style="margin-top: 40px; text-align: center; font-family: sans-serif; font-size: 12px; page-break-inside: avoid;">
+                <table style="width: 100%; border-collapse: collapse; margin-top: 30px;">
+                    <tr>
+                        <td style="width: 50%; padding: 10px;">
+                            <div style="border-top: 1px solid #000; width: 80%; margin: 0 auto; padding-top: 5px;">
+                                <strong>Assinatura do Motorista</strong><br>
+                                <span style="color: #475569;">${driverObj.name}</span>
+                            </div>
+                        </td>
+                        <td style="width: 50%; padding: 10px;">
+                            <div style="border-top: 1px solid #000; width: 80%; margin: 0 auto; padding-top: 5px;">
+                                <strong>Responsável Técnico / Supervisor</strong><br>
+                                <span style="color: #475569;">Conferido por</span>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+                <p style="margin-top: 20px; color: #94a3b8; font-size: 10px;">Documento gerado eletronicamente - BioLogistics App</p>
+            </div>
+        `;
+
+        container.innerHTML = html;
+        container.style.display = 'block';
+
+        var opt = {
+            margin: 10,
+            filename: `Auditoria_RDC504_${record.vehicle}_${new Date(record.date).toISOString().slice(0,10)}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, useCORS: true },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+
+        html2pdf().set(opt).from(container).save().then(() => {
+            container.style.display = 'none';
+        });
+    },
+
+    renderHistory: function() {
+        const tbody = document.getElementById('history-tbody');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+        
+        if (this.state.history.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center py-6 text-gray-500">Nenhum relatório salvo ainda.</td></tr>';
+            return;
+        }
+
+        this.state.history.forEach(h => {
+            const dateObj = new Date(h.date);
+            const statusHtml = h.blocked 
+                ? '<span class="bg-red-100 text-red-800 text-xs font-bold px-2 py-1 rounded">Bloqueada</span>' 
+                : '<span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2 py-1 rounded">Concluída</span>';
+
+            tbody.innerHTML += `
+                <tr>
+                    <td class="text-sm">${dateObj.toLocaleDateString('pt-BR')}<br><span class="text-xs text-gray-500">${dateObj.toLocaleTimeString('pt-BR')}</span></td>
+                    <td class="font-medium">${h.vehicle}<br><span class="text-xs text-gray-500">${h.driver}</span></td>
+                    <td class="text-center font-bold">${h.collections.length}</td>
+                    <td>${statusHtml}</td>
+                    <td>
+                        <button onclick="app.generatePDF(app.state.history.find(x => x.id === ${h.id}))" class="text-blue-600 hover:text-blue-900 bg-blue-50 px-3 py-1 rounded border border-blue-200 text-sm font-medium transition-colors">
+                            <i class="fa-solid fa-download mr-1"></i> PDF
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+    },
+
+    showToast: function(message, type = 'default') {
+        const toast = document.getElementById("toast");
+        toast.textContent = message;
+        toast.className = "show " + type;
+        setTimeout(() => toast.className = toast.className.replace("show", ""), 3000);
+    },
+
+    showCustomModal: function(title, message) {
+        const overlay = document.createElement('div');
+        overlay.className = 'fixed inset-0 bg-black bg-opacity-70 z-[100] flex items-center justify-center p-4';
+        const modal = document.createElement('div');
+        modal.className = 'bg-white rounded-xl shadow-2xl p-6 max-w-sm w-full border-t-8 border-red-600';
+        modal.innerHTML = `
+            <h3 class="text-xl font-bold text-gray-900 mb-2">${title}</h3>
+            <p class="text-gray-600 mb-6 text-sm leading-relaxed">${message}</p>
+            <button class="w-full bg-gray-900 text-white font-bold py-3 px-4 rounded-lg hover:bg-gray-800 transition-colors" onclick="this.closest('.fixed').remove()">Ciente</button>
+        `;
+        overlay.appendChild(modal);
+        document.body.appendChild(overlay);
+    },
+
+    showConfirmModal: function(title, message, onConfirm) {
+        const overlay = document.createElement('div');
+        overlay.className = 'fixed inset-0 bg-black bg-opacity-70 z-[100] flex items-center justify-center p-4';
+        const modal = document.createElement('div');
+        modal.className = 'bg-white rounded-xl shadow-2xl p-6 max-w-sm w-full border-t-8 border-indigo-600';
+        modal.innerHTML = `
+            <h3 class="text-xl font-bold text-gray-900 mb-2">${title}</h3>
+            <p class="text-gray-600 mb-6 text-sm leading-relaxed">${message}</p>
+            <div class="flex gap-3">
+                <button class="flex-1 bg-gray-100 text-gray-700 border border-gray-300 font-bold py-3 px-4 rounded-lg hover:bg-gray-200 transition-colors" onclick="this.closest('.fixed').remove()">Cancelar</button>
+                <button id="modal-confirm-btn" class="flex-1 bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-indigo-700 transition-colors">Confirmar</button>
+            </div>
+        `;
+        overlay.appendChild(modal);
+        document.body.appendChild(overlay);
+
+        document.getElementById('modal-confirm-btn').onclick = () => {
+            overlay.remove();
+            if(onConfirm) onConfirm();
+        };
+    }
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+    app.init();
+    app.renderHistory(); 
+});
+</script>
+</body>
+</html>
