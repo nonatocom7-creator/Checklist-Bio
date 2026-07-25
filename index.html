@@ -39,6 +39,7 @@
         .photo-upload-wrapper.active {
             display: block;
         }
+        
         #toast {
             visibility: hidden;
             min-width: 250px;
@@ -128,7 +129,6 @@
 
 <div class="app-container flex flex-col relative" id="app-root">
     
-    <!-- Top Navigation Bar -->
     <div class="nav-tabs shadow-sm sticky top-0 z-40" id="main-nav-tabs">
         <div class="nav-tab op-tab active" onclick="app.switchTab('view-dashboard', this)">
             <i class="fa-solid fa-clipboard-list text-blue-500"></i> Operação / Checklist
@@ -147,7 +147,6 @@
         </div>
     </div>
 
-    <!-- Header Operacional -->
     <header id="op-header" class="bg-blue-700 text-white p-4 shadow-md">
         <div class="flex justify-between items-center">
             <div class="flex items-center gap-3">
@@ -166,7 +165,6 @@
 
     <main class="flex-grow p-4 overflow-y-auto pb-24" id="main-content">
         
-        <!-- Dashboard / Operação View -->
         <div id="view-dashboard" class="space-y-6">
             <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
                 <h2 class="font-semibold text-gray-800 mb-4"><i class="fa-solid fa-user-check mr-2 text-blue-600"></i>Identificação da Rota</h2>
@@ -232,10 +230,11 @@
             <div class="management-card">
                 <h3 class="font-bold text-gray-700 text-lg mb-4">Cadastrar Novo Veículo</h3>
                 <form id="form-vehicle" onsubmit="app.saveVehicle(event)">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                         <div>
                             <label class="form-label">Placa:</label>
-                            <input type="text" id="v_placa" class="form-input" placeholder="ABC-1234" required pattern="[A-Za-z0-9-]{7,8}">
+                            <!-- Note: Added oninput mask to auto-uppercase plates -->
+                            <input type="text" id="v_placa" class="form-input" placeholder="ABC-1234" required pattern="[A-Za-z0-9-]{7,8}" oninput="this.value = this.value.toUpperCase()">
                         </div>
                         <div>
                             <label class="form-label">Modelo:</label>
@@ -246,25 +245,7 @@
                             <input type="email" id="v_email" class="form-input" placeholder="frota@empresa.com">
                         </div>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                        <div>
-                            <label class="form-label">KM Últ. Revisão:</label>
-                            <input type="number" id="v_km_rev" class="form-input" value="0">
-                        </div>
-                        <div>
-                            <label class="form-label">Intervalo Revisão (KM):</label>
-                            <input type="number" id="v_int_rev" class="form-input" value="10000">
-                        </div>
-                        <div>
-                            <label class="form-label">KM Últ. Tr. Óleo:</label>
-                            <input type="number" id="v_km_oleo" class="form-input" value="0">
-                        </div>
-                        <div>
-                            <label class="form-label">Intervalo Óleo (KM):</label>
-                            <input type="number" id="v_int_oleo" class="form-input" value="10000">
-                        </div>
-                    </div>
-                    <button type="submit" class="btn-success">Salvar Veículo</button>
+                    <button type="submit" class="btn-success">Salvar Veículo na Nuvem</button>
                 </form>
             </div>
 
@@ -292,7 +273,7 @@
                 <form id="form-employee" onsubmit="app.saveEmployee(event)">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                         <div>
-                            <label class="form-label">Matrícula / ID:</label>
+                            <label class="form-label">Matrícula / ID (Gerado Automático):</label>
                             <input type="text" id="e_id" class="form-input" placeholder="MOT-001" required>
                         </div>
                         <div>
@@ -310,7 +291,7 @@
                             <input type="date" id="e_data_validade" class="form-input" required>
                         </div>
                     </div>
-                    <button type="submit" class="btn-success bg-emerald-600 hover:bg-emerald-700">Salvar Colaborador</button>
+                    <button type="submit" class="btn-success bg-emerald-600 hover:bg-emerald-700">Salvar Colaborador na Nuvem</button>
                 </form>
             </div>
 
@@ -433,10 +414,6 @@
                     <p class="text-sm text-gray-500" id="pre-route-vehicle-label"></p>
                 </div>
             </div>
-            
-            <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 text-sm text-yellow-800 mb-6 rounded-r-lg shadow-sm">
-                <i class="fa-solid fa-location-dot mr-1"></i> A geolocalização será capturada ao salvar para fins de auditoria.
-            </div>
 
             <form id="form-pre-route" class="space-y-8 pb-10">
                 <div class="question-block bg-white p-4 rounded-xl border border-gray-200 shadow-sm" data-id="pr_q1">
@@ -551,7 +528,7 @@
 
                 <div class="pt-4 pb-8 sticky bottom-0 z-10 bg-[#f0f2f5] p-2 border-t border-gray-300 -mx-4 px-4">
                     <button type="button" onclick="app.submitPreRoute()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-4 rounded-xl shadow-lg transition-colors flex justify-center items-center text-lg">
-                        <span id="btn-pre-text">Salvar Pré-Rota e Capturar GPS</span>
+                        <span id="btn-pre-text">Salvar Pré-Rota</span>
                     </button>
                 </div>
             </form>
@@ -611,7 +588,7 @@
                 <div class="question-block bg-white p-5 rounded-xl border-2 border-indigo-100 shadow-sm bg-gradient-to-r from-white to-indigo-50">
                     <label class="font-bold text-indigo-900 mb-3 block">3. Qual a temperatura registrada no momento da coleta? (°C)</label>
                     <div class="flex items-center gap-3">
-                        <input type="number" id="col_temp" step="0.1" required class="w-32 text-center text-2xl font-bold rounded-lg border-indigo-300 border-2 p-3 focus:ring-indigo-500 focus:border-indigo-500 text-indigo-700" placeholder="0.0">
+                        <input type="number" id="col_temp" inputmode="decimal" step="0.1" required class="w-32 text-center text-2xl font-bold rounded-lg border-indigo-300 border-2 p-3 focus:ring-indigo-500 focus:border-indigo-500 text-indigo-700" placeholder="0.0">
                         <span class="text-indigo-800 font-bold text-xl">°C</span>
                     </div>
                     <div class="mt-4 p-4 bg-white rounded-lg border border-dashed border-indigo-300">
@@ -646,7 +623,6 @@
         </div>
     </main>
     
-    <!-- Elementos Ocultos e Modais -->
     <div id="pdf-container" style="display: none; background: white; padding: 20px; font-family: sans-serif; color: black;"></div>
     <div id="toast">Message</div>
 </div>
@@ -666,13 +642,39 @@
     </div>
 </div>
 
+<div id="confirm-modal" class="fixed inset-0 bg-black bg-opacity-70 z-[250] hidden items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-2xl p-6 max-w-sm w-full">
+        <h3 id="confirm-title" class="text-xl font-bold text-gray-900 mb-2">Confirmação</h3>
+        <p id="confirm-msg" class="text-gray-600 text-sm mb-6">Tem certeza que deseja prosseguir?</p>
+        <div class="flex gap-3">
+            <button onclick="document.getElementById('confirm-modal').classList.replace('flex', 'hidden')" class="flex-1 bg-gray-200 text-gray-800 font-bold py-3 px-4 rounded-lg hover:bg-gray-300 transition-colors">
+                Cancelar
+            </button>
+            <button id="confirm-btn-yes" class="flex-1 bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors">
+                Confirmar
+            </button>
+        </div>
+    </div>
+</div>
+
+<div id="custom-alert-modal" class="fixed inset-0 bg-black bg-opacity-70 z-[250] hidden items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-2xl p-6 max-w-sm w-full text-center border-t-4 border-blue-500" id="custom-alert-box">
+        <div class="mb-4 text-blue-500" id="custom-alert-icon">
+            <i class="fa-solid fa-circle-info text-4xl"></i>
+        </div>
+        <h3 id="custom-alert-title" class="text-xl font-bold text-gray-900 mb-2">Informação</h3>
+        <p id="custom-alert-msg" class="text-gray-600 text-sm mb-6">Mensagem do sistema.</p>
+        <button onclick="document.getElementById('custom-alert-modal').classList.replace('flex', 'hidden')" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors" id="custom-alert-btn">
+            Entendido
+        </button>
+    </div>
+</div>
+
 <script>
-// ==========================================
-// COLE A URL DO SEU GOOGLE APPS SCRIPT AQUI:
-// ==========================================
-const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbyfFPTUuKj_92oGAzFYJfD71FLaZpmRA2O7SN-yi9htFGiTI2DJXzDHsSmRMGPojtRC/exec";
+const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbxgVPc5o79d47VTivv90meooY2g5bWb3Ol0hSUU3c8wrMjnuW30VMb8kFB-dMIPSqsM/exec";
 
 const app = {
+    isDriverMode: false,
     state: {
         driver: null,
         vehicle: null,
@@ -681,14 +683,8 @@ const app = {
         routeBlocked: false,
         collections: [], 
         history: [], 
-        drivers: [
-            { id: 'MOT-001', name: 'João Silva', trainingDate: '2025-10-01', expiryDate: '2026-10-01' },
-            { id: 'MOT-002', name: 'Maria Santos', trainingDate: '2025-05-15', expiryDate: '2026-05-15' }
-        ],
-        vehicles: [
-            { plate: 'ABC-1234', model: 'Fiorino', email: 'frota@empresa.com', kmRev: '50000', intRev: '10000', kmOil: '50000', intOil: '10000', lastChecklistDate: null },
-            { plate: 'XYZ-9876', model: 'Saveiro', email: 'oficina@empresa.com', kmRev: '32000', intRev: '10000', kmOil: '35000', intOil: '10000', lastChecklistDate: '2026-07-24' }
-        ]
+        drivers: [],
+        vehicles: []
     },
     
     charts: {},
@@ -700,16 +696,14 @@ const app = {
         const qrPlate = urlParams.get('placa');
         
         if (qrPlate) {
-            // ==========================================
-            // MODO MOTORISTA (Acesso via QR Code)
-            // ==========================================
+            this.isDriverMode = true;
             let vExists = this.state.vehicles.find(v => v.plate === qrPlate);
             
             if (!vExists) {
                 const newTempVehicle = { 
                     plate: qrPlate, 
                     model: 'Veículo identificado via QR', 
-                    email: '', kmRev: '0', intRev: '10000', kmOil: '0', intOil: '10000', 
+                    email: '', 
                     lastChecklistDate: null 
                 };
                 this.state.vehicles.push(newTempVehicle);
@@ -717,7 +711,6 @@ const app = {
             
             this.state.vehicle = qrPlate;
             
-            // Oculta abas do Administrador
             const adminTabs = document.querySelectorAll('.admin-tab');
             adminTabs.forEach(tab => tab.style.display = 'none');
             
@@ -731,12 +724,6 @@ const app = {
             this.switchTab('view-dashboard', document.querySelector('.op-tab'));
             this.saveState();
         } else {
-            // ==========================================
-            // MODO ADMINISTRADOR (Acesso via Link Direto pelo PC)
-            // ==========================================
-            // O Administrador continua vendo a aba de Operação para poder testar,
-            // mas o sistema abre automaticamente no Dashboard de Performance.
-            
             setTimeout(() => {
                 const perfTab = document.querySelector('.nav-tab[onclick*="view-performance"]');
                 if (perfTab) this.switchTab('view-performance', perfTab);
@@ -748,16 +735,7 @@ const app = {
         this.renderEmployeesList();
         this.updateUI();
         
-        // NOVO: Baixa o histórico atualizado da nuvem (Google Sheets) ao abrir o app
         this.syncHistoryFromCloud();
-
-        if (qrPlate && this.state.vehicles.find(v => v.plate === qrPlate)) {
-            const vSelect = document.getElementById('vehicle-select');
-            if (vSelect) {
-                vSelect.disabled = true;
-                vSelect.classList.add('bg-slate-200', 'cursor-not-allowed', 'font-bold');
-            }
-        }
     },
 
     saveState: function() {
@@ -776,29 +754,31 @@ const app = {
         }
     },
     
-    // ==========================================
-    // FUNÇÃO QUE PUXA OS DADOS DO GOOGLE SHEETS
-    // ==========================================
     syncHistoryFromCloud: async function() {
-        if(GOOGLE_SHEETS_URL === "COLE_AQUI_A_URL_DO_SEU_GOOGLE_APPS_SCRIPT") {
+        if(GOOGLE_SHEETS_URL.includes("COLE_AQUI")) {
             console.warn("URL do Google Sheets não configurada.");
             return;
         }
         
         try {
-            // Informa visualmente que está sincronizando (só se for administrador)
             const btnSync = document.getElementById('sync-text');
             if(btnSync) btnSync.textContent = 'Sincronizando Nuvem...';
+            document.getElementById('sync-dot').className = 'w-2 h-2 rounded-full bg-blue-400 animate-pulse';
             
             const response = await fetch(GOOGLE_SHEETS_URL);
             const data = await response.json();
             
-            if (Array.isArray(data)) {
-                this.state.history = data;
-                this.saveState(); // Salva localmente como backup
+            if (data && typeof data === 'object' && !Array.isArray(data)) {
+                if(data.history !== undefined) this.state.history = data.history;
+                if(data.vehicles !== undefined) this.state.vehicles = data.vehicles;
+                if(data.drivers !== undefined) this.state.drivers = data.drivers;
+
+                this.saveState();
                 this.renderHistory();
+                this.renderVehiclesList();
+                this.renderEmployeesList();
+                this.renderSelects(); 
                 
-                // Se a tela de performance estiver aberta, atualiza os gráficos
                 if(document.getElementById('view-performance').classList.contains('section-hidden') === false) {
                     this.renderDashboard();
                 }
@@ -806,11 +786,15 @@ const app = {
                 if(btnSync) {
                     btnSync.textContent = 'Sincronizado';
                     document.getElementById('sync-dot').className = 'w-2 h-2 rounded-full bg-emerald-400';
+                    document.getElementById('sync-dot').classList.remove('animate-pulse');
                 }
             }
         } catch (error) {
             console.error("Erro ao sincronizar com nuvem:", error);
-            this.showToast("Erro ao carregar histórico da nuvem.", "warning");
+            const btnSync = document.getElementById('sync-text');
+            if(btnSync) btnSync.textContent = 'Modo Offline';
+            document.getElementById('sync-dot').className = 'w-2 h-2 rounded-full bg-gray-400';
+            app.showToast("Trabalhando Offline. Atualização falhou.", "warning");
         }
     },
 
@@ -837,11 +821,33 @@ const app = {
         }
         
         if(viewId === 'view-dashboard') this.updateUI();
+        if(viewId === 'view-history') this.renderHistory();
         if(viewId === 'view-performance') this.renderDashboard();
+        
+        if(viewId === 'view-employees') {
+            document.getElementById('form-employee').reset();
+            document.getElementById('e_id').value = this.getNextEmployeeId();
+        }
+    },
+
+    getNextEmployeeId: function() {
+        if (!this.state.drivers || this.state.drivers.length === 0) return 'MOT-001';
+        let maxId = 0;
+        this.state.drivers.forEach(d => {
+            if (!d || !d.id) return;
+            const match = d.id.match(/\d+/);
+            if (match) {
+                const num = parseInt(match[0], 10);
+                if (num > maxId) maxId = num;
+            }
+        });
+        const nextId = maxId + 1;
+        return `MOT-${nextId.toString().padStart(3, '0')}`;
     },
 
     renderSelects: function() {
         const dSelect = document.getElementById('driver-select');
+        const currentDriver = dSelect.value || this.state.driver;
         dSelect.innerHTML = '<option value="">Selecione o motorista...</option>';
         
         const today = new Date();
@@ -853,38 +859,21 @@ const app = {
             dSelect.innerHTML += `<option value="${d.id}" ${isExpired ? 'disabled' : ''}>${d.name}${statusStr}</option>`;
         });
         
-        dSelect.innerHTML += '<option value="NOVO" class="font-bold text-blue-600">+ Cadastrar Meu Usuário Rápido</option>';
-
+        if (currentDriver) dSelect.value = currentDriver;
+        
         const vSelect = document.getElementById('vehicle-select');
+        const currentVehicle = vSelect.value || this.state.vehicle;
         vSelect.innerHTML = '<option value="">Selecione o veículo...</option>';
         this.state.vehicles.forEach(v => {
             vSelect.innerHTML += `<option value="${v.plate}">${v.plate} - ${v.model}</option>`;
         });
+        
+        if (currentVehicle) vSelect.value = currentVehicle;
     },
 
     handleDriverChange: function(val) {
-        if(val === 'NOVO') {
-            const name = prompt("Digite seu Nome Completo:");
-            const id = prompt("Digite sua Matrícula (Ex: MOT-003):");
-            if(name && id) {
-                this.state.drivers.push({
-                    id: id.toUpperCase(),
-                    name: name,
-                    trainingDate: this.getTodayStr(),
-                    expiryDate: (new Date().getFullYear() + 1) + '-' + this.getTodayStr().substring(5)
-                });
-                this.state.driver = id.toUpperCase();
-                this.saveState();
-                this.renderSelects();
-                document.getElementById('driver-select').value = this.state.driver;
-                this.showToast('Usuário cadastrado com sucesso!', 'success');
-            } else {
-                document.getElementById('driver-select').value = this.state.driver || "";
-            }
-        } else {
-            this.state.driver = val;
-            this.saveState();
-        }
+        this.state.driver = val;
+        this.saveState();
         this.updateUI();
     },
 
@@ -904,15 +893,46 @@ const app = {
             if(vSelect) vSelect.value = this.state.vehicle;
         }
 
+        if (this.isDriverMode) {
+            document.querySelectorAll('.admin-tab').forEach(tab => tab.style.display = 'none');
+            const vSelect = document.getElementById('vehicle-select');
+            if (vSelect) {
+                vSelect.value = this.state.vehicle;
+                vSelect.disabled = true;
+                vSelect.classList.add('bg-slate-200', 'cursor-not-allowed', 'font-bold');
+            }
+        }
+
         const btnCol = document.getElementById('btn-collection');
-        if (this.state.preRouteCompleted && !this.state.routeBlocked) {
+        const selectedVehicleObj = this.state.vehicles.find(v => v.plate === this.state.vehicle);
+        const todayStr = this.getTodayStr();
+        const hasPreRouteToday = selectedVehicleObj && selectedVehicleObj.lastChecklistDate === todayStr;
+        const btnPreRoute = document.querySelector('button[onclick="app.startPreRoute()"]');
+
+        if ((this.state.preRouteCompleted || hasPreRouteToday) && !this.state.routeBlocked) {
             btnCol.disabled = false;
             btnCol.className = 'bg-white border-2 border-indigo-600 text-indigo-700 hover:bg-indigo-50 rounded-xl p-5 flex items-center justify-between transition-colors shadow-sm';
             btnCol.querySelector('i').className = 'fa-solid fa-box-open text-3xl text-indigo-500';
+            
+            const pTag = btnCol.querySelector('p');
+            if(pTag) pTag.innerHTML = 'Inspeção no cliente <span class="block text-emerald-600 font-bold text-xs mt-1"><i class="fa-solid fa-unlock"></i> Liberado (Pré-Rota OK)</span>';
+            
+            if (hasPreRouteToday && btnPreRoute && !this.state.preRouteCompleted) {
+                const preP = btnPreRoute.querySelector('p');
+                if(preP) preP.innerHTML = '<span class="text-emerald-600 font-bold"><i class="fa-solid fa-check-double"></i> Realizado Hoje</span>';
+            }
         } else {
             btnCol.disabled = true;
             btnCol.className = 'bg-slate-100 border-2 border-slate-300 text-slate-400 rounded-xl p-5 flex items-center justify-between transition-colors shadow-sm cursor-not-allowed';
             btnCol.querySelector('i').className = 'fa-solid fa-box-open text-3xl';
+            
+            const pTag = btnCol.querySelector('p');
+            if(pTag) pTag.innerHTML = 'Inspeção no ponto do cliente (Requer Pré-Rota)';
+            
+            if (btnPreRoute) {
+                const preP = btnPreRoute.querySelector('p');
+                if(preP) preP.innerHTML = 'Inspeção diária (Trava de 1 por dia/veículo)';
+            }
         }
 
         const syncDot = document.getElementById('sync-dot');
@@ -955,13 +975,10 @@ const app = {
         const plate = document.getElementById('v_placa').value.toUpperCase();
         
         const newVehicle = {
+            action: 'save_vehicle',
             plate: plate,
             model: document.getElementById('v_modelo').value,
             email: document.getElementById('v_email').value,
-            kmRev: document.getElementById('v_km_rev').value,
-            intRev: document.getElementById('v_int_rev').value,
-            kmOil: document.getElementById('v_km_oleo').value,
-            intOil: document.getElementById('v_int_oleo').value,
             lastChecklistDate: null
         };
 
@@ -969,16 +986,26 @@ const app = {
         if (idx >= 0) {
             newVehicle.lastChecklistDate = this.state.vehicles[idx].lastChecklistDate;
             this.state.vehicles[idx] = newVehicle;
-            this.showToast('Veículo atualizado.', 'success');
+            app.showToast('Veículo atualizado localmente. Enviando...', 'success');
         } else {
             this.state.vehicles.push(newVehicle);
-            this.showToast('Veículo cadastrado.', 'success');
+            app.showToast('Veículo cadastrado localmente. Enviando...', 'success');
         }
 
         this.saveState();
         this.renderVehiclesList();
         this.renderSelects();
         e.target.reset();
+
+        fetch(GOOGLE_SHEETS_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(newVehicle)
+        }).then(() => {
+            app.showToast('Veículo salvo na Nuvem!', 'success');
+        }).catch(() => {
+            app.showToast('Aviso: Salvo apenas offline.', 'warning');
+        });
     },
 
     renderVehiclesList: function() {
@@ -987,6 +1014,8 @@ const app = {
         let htmlContent = ''; 
 
         this.state.vehicles.forEach(v => {
+            if(!v || !v.plate) return; // Segurança extra
+
             const isLocked = v.lastChecklistDate === todayStr;
             const statusHtml = isLocked 
                 ? '<span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-1 rounded"><i class="fa-solid fa-lock mr-1"></i>Realizado Hoje</span>' 
@@ -1017,13 +1046,13 @@ const app = {
     deleteVehicle: function(plate) {
         this.showConfirmModal(
             "Excluir Veículo", 
-            `Tem certeza que deseja excluir o veículo placa <b>${plate}</b>?`,
+            `A exclusão principal deve ser feita na aba <b>Veiculos</b> da Planilha Google (ou AppSheet) para que apague para todos os usuários. <br><br>Tem certeza que deseja apagar a exibição deste veículo no seu celular?`,
             () => {
                 this.state.vehicles = this.state.vehicles.filter(v => v.plate !== plate);
                 this.saveState();
                 this.renderVehiclesList();
                 this.renderSelects();
-                this.showToast('Veículo excluído com sucesso.', 'success');
+                app.showToast('Veículo excluído localmente.', 'success');
             }
         );
     },
@@ -1034,7 +1063,12 @@ const app = {
         const container = document.getElementById('qrcode-display');
         container.innerHTML = ''; 
         
-        const baseUrl = window.location.origin + window.location.pathname;
+        // Pega a URL atual de forma segura, removendo lixos de iframe ou parâmetros antigos
+        let baseUrl = window.location.href.split('?')[0].split('#')[0];
+        
+        // Se a pessoa estiver no ambiente do Apps Script (exec), garante que o final da URL esteja correto
+        if (baseUrl.endsWith('/dev')) baseUrl = baseUrl.replace('/dev', '/exec');
+        
         const targetUrl = `${baseUrl}?placa=${plate}`;
         
         new QRCode(container, {
@@ -1054,6 +1088,7 @@ const app = {
         const id = document.getElementById('e_id').value;
         
         const newEmp = {
+            action: 'save_employee',
             id: id,
             name: document.getElementById('e_nome').value,
             trainingDate: document.getElementById('e_data_treinamento').value,
@@ -1063,16 +1098,27 @@ const app = {
         const idx = this.state.drivers.findIndex(d => d.id === id);
         if (idx >= 0) {
             this.state.drivers[idx] = newEmp;
-            this.showToast('Colaborador atualizado.', 'success');
+            app.showToast('Colaborador atualizado localmente. Enviando...', 'success');
         } else {
             this.state.drivers.push(newEmp);
-            this.showToast('Colaborador cadastrado.', 'success');
+            app.showToast('Colaborador cadastrado localmente. Enviando...', 'success');
         }
 
         this.saveState();
         this.renderEmployeesList();
         this.renderSelects();
         e.target.reset();
+        document.getElementById('e_id').value = this.getNextEmployeeId();
+
+        fetch(GOOGLE_SHEETS_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(newEmp)
+        }).then(() => {
+            app.showToast('Motorista salvo na Nuvem!', 'success');
+        }).catch(() => {
+            app.showToast('Aviso: Salvo apenas offline.', 'warning');
+        });
     },
 
     renderEmployeesList: function() {
@@ -1082,17 +1128,28 @@ const app = {
         let htmlContent = ''; 
 
         this.state.drivers.forEach(d => {
-            const expDate = new Date(d.expiryDate + 'T00:00:00'); 
+            if(!d || !d.id) return; // Segurança
+
+            // Proteção para caso a data venha formato ISO do Google
+            let dateToCompare = d.expiryDate;
+            if(dateToCompare.includes('T')) {
+                dateToCompare = dateToCompare.split('T')[0];
+            }
+
+            const expDate = new Date(dateToCompare + 'T00:00:00'); 
             const diffTime = expDate - today;
             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
             let statusHtml = '';
-            if (diffDays < 0) {
-                statusHtml = '<span class="bg-red-100 text-red-800 text-xs font-bold px-2 py-1 rounded border border-red-200">Vencido</span>';
+            let btnCert = '';
+            if (diffDays < 0 || isNaN(diffDays)) {
+                statusHtml = '<span class="bg-red-100 text-red-800 text-xs font-bold px-2 py-1 rounded border border-red-200">Vencido/Inválido</span>';
             } else if (diffDays <= 30) {
                 statusHtml = `<span class="bg-yellow-100 text-yellow-800 text-xs font-bold px-2 py-1 rounded border border-yellow-200">Vence em ${diffDays} dias</span>`;
+                btnCert = `<button onclick="app.generateCertificate('${d.id}')" class="bg-green-100 text-green-700 hover:bg-green-200 border border-green-300 text-xs font-bold px-2 py-1 rounded ml-2 transition-colors"><i class="fa-solid fa-file-contract mr-1"></i>Certificado</button>`;
             } else {
                 statusHtml = '<span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2 py-1 rounded border border-emerald-200">Regular</span>';
+                btnCert = `<button onclick="app.generateCertificate('${d.id}')" class="bg-green-100 text-green-700 hover:bg-green-200 border border-green-300 text-xs font-bold px-2 py-1 rounded ml-2 transition-colors"><i class="fa-solid fa-file-contract mr-1"></i>Certificado</button>`;
             }
 
             htmlContent += `
@@ -1100,7 +1157,7 @@ const app = {
                     <td class="font-medium">${d.id} <br><span class="text-sm text-gray-500">${d.name}</span></td>
                     <td class="text-sm">${this.formatDate(d.trainingDate)}</td>
                     <td class="text-sm font-medium ${diffDays < 0 ? 'text-red-600' : ''}">${this.formatDate(d.expiryDate)}</td>
-                    <td>${statusHtml}</td>
+                    <td>${statusHtml} ${btnCert}</td>
                     <td>
                         <div class="flex items-center gap-3">
                             <button onclick="app.editEmployee('${d.id}')" class="text-blue-600 hover:text-blue-900 text-sm font-medium transition-colors">Editar</button>
@@ -1117,13 +1174,13 @@ const app = {
     deleteEmployee: function(id) {
         this.showConfirmModal(
             "Excluir Usuário", 
-            `Tem certeza que deseja excluir o usuário ID <b>${id}</b>?`,
+            `A exclusão principal deve ser feita na aba <b>Motoristas</b> da Planilha Google (ou AppSheet) para que apague para todos os usuários. <br><br>Tem certeza que deseja apagar a exibição deste usuário no seu celular?`,
             () => {
                 this.state.drivers = this.state.drivers.filter(d => d.id !== id);
                 this.saveState();
                 this.renderEmployeesList();
                 this.renderSelects();
-                this.showToast('Usuário excluído com sucesso.', 'success');
+                app.showToast('Usuário excluído localmente.', 'success');
             }
         );
     },
@@ -1133,8 +1190,8 @@ const app = {
         if(emp) {
             document.getElementById('e_id').value = emp.id;
             document.getElementById('e_nome').value = emp.name;
-            document.getElementById('e_data_treinamento').value = emp.trainingDate;
-            document.getElementById('e_data_validade').value = emp.expiryDate;
+            document.getElementById('e_data_treinamento').value = emp.trainingDate.split('T')[0];
+            document.getElementById('e_data_validade').value = emp.expiryDate.split('T')[0];
             window.scrollTo(0,0);
         }
     },
@@ -1143,16 +1200,19 @@ const app = {
         const d = this.state.driver;
         const v = this.state.vehicle;
         if (!d || d === 'NOVO' || !v) {
-            this.showToast('Por favor, certifique-se de selecionar Motorista e Veículo na Dashboard.', 'error');
+            app.showToast('Por favor, certifique-se de selecionar Motorista e Veículo na Dashboard.', 'error');
             return false;
         }
         
         const driverObj = this.state.drivers.find(x => x.id === d);
-        if (driverObj && new Date(driverObj.expiryDate) < new Date()) {
-            this.showToast('Treinamento do motorista está vencido. Acesso negado.', 'error');
-            return false;
+        if (driverObj) {
+            let dateToCompare = driverObj.expiryDate;
+            if(dateToCompare.includes('T')) dateToCompare = dateToCompare.split('T')[0];
+            if (new Date(dateToCompare + 'T00:00:00') < new Date()) {
+                app.showToast('Treinamento do motorista está vencido. Acesso negado.', 'error');
+                return false;
+            }
         }
-
         return true;
     },
 
@@ -1161,10 +1221,14 @@ const app = {
         return (new Date(Date.now() - tzoffset)).toISOString().split('T')[0];
     },
 
-    formatDate: function(ymdString) {
-        if(!ymdString) return '';
-        const parts = ymdString.split('-');
-        if(parts.length !== 3) return ymdString;
+    formatDate: function(dateString) {
+        if(!dateString) return '';
+        if(dateString.includes('T')) {
+            const d = new Date(dateString);
+            return d.toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+        }
+        const parts = dateString.split('-');
+        if(parts.length !== 3) return dateString;
         return `${parts[2]}/${parts[1]}/${parts[0]}`;
     },
 
@@ -1174,10 +1238,10 @@ const app = {
         const selectedVehicle = this.state.vehicles.find(v => v.plate === this.state.vehicle);
         const todayStr = this.getTodayStr();
         
-        if (selectedVehicle && selectedVehicle.lastChecklistDate === todayStr) {
+        if (selectedVehicle && selectedVehicle.lastChecklistDate === todayStr && !this.state.preRouteCompleted) {
             this.showCustomModal(
-                "Acesso Bloqueado", 
-                `O checklist Pré-Rota para o veículo <b>${this.state.vehicle}</b> já foi realizado hoje (${this.formatDate(todayStr)}). Conforme regra, só é permitida uma inspeção inicial diária.`
+                "Pré-Rota já realizado", 
+                `O checklist Pré-Rota para o veículo <b>${this.state.vehicle}</b> já foi preenchido hoje. O módulo de <b>Coletas</b> já está liberado para você iniciar novas rotas!`
             );
             return;
         }
@@ -1202,7 +1266,7 @@ const app = {
 
     startCollection: function() {
         if (this.state.routeBlocked) {
-            this.showToast('Rota bloqueada devido a não conformidade crítica no Pré-Rota.', 'error');
+            app.showToast('Rota bloqueada devido a não conformidade crítica no Pré-Rota.', 'error');
             return;
         }
         document.getElementById('form-collection').reset();
@@ -1233,56 +1297,23 @@ const app = {
         }
     },
 
-    getGeolocation: function() {
-        return new Promise((resolve) => {
-            const mockFallback = {lat: -3.71839, lng: -38.5434, accuracy: 10, timestamp: new Date().toISOString()};
-            
-            if (!navigator.geolocation) {
-                resolve(mockFallback);
-                return;
-            }
-            
-            const timeoutId = setTimeout(() => {
-                resolve(mockFallback);
-            }, 4000);
-
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    clearTimeout(timeoutId);
-                    resolve({
-                        lat: position.coords.latitude,
-                        lng: position.coords.longitude,
-                        accuracy: position.coords.accuracy,
-                        timestamp: new Date().toISOString()
-                    });
-                },
-                (error) => {
-                    clearTimeout(timeoutId);
-                    resolve(mockFallback);
-                },
-                { enableHighAccuracy: true, timeout: 3500, maximumAge: 0 }
-            );
-        });
-    },
-
     submitPreRoute: async function() {
         const form = document.getElementById('form-pre-route');
         
         if (!form.checkValidity()) {
-            this.showToast('⚠️ Preencha todas as questões e anexe as fotos obrigatórias solicitadas.', 'warning');
+            app.showToast('⚠️ Preencha todas as questões e anexe as fotos obrigatórias solicitadas.', 'warning');
             try { form.reportValidity(); } catch(e){}
             return;
         }
 
         const btnText = document.getElementById('btn-pre-text');
         btnText.innerHTML = '<div class="loader"></div> Salvando informações...';
+        btnText.parentElement.disabled = true;
 
         try {
-            const geo = await this.getGeolocation();
             const formData = new FormData(form);
             const data = {
                 timestamp: new Date().toLocaleString('pt-BR'),
-                location: geo,
                 q1: formData.get('pr_q1'),
                 q2: formData.get('pr_q2'),
                 q3: formData.get('pr_q3'), 
@@ -1292,34 +1323,36 @@ const app = {
             };
 
             if (data.q3 === 'Não Conforme') {
-                this.state.routeBlocked = true;
-                this.showCustomModal(
+                app.state.routeBlocked = true;
+                app.showCustomModal(
                     "🚨 ALERTA CRÍTICO: Rota Bloqueada", 
                     "O Kit de Derramamento está incompleto ou vencido. Conforme RDC 504, o veículo está impedido de realizar transporte biológico."
                 );
             } else {
-                this.state.routeBlocked = false;
-                this.showToast('Checklist Pré-Rota salvo e travado no veículo!', 'success');
+                app.state.routeBlocked = false;
+                app.showToast('Checklist Pré-Rota salvo e travado no veículo!', 'success');
             
-                const vIdx = this.state.vehicles.findIndex(v => v.plate === this.state.vehicle);
+                const vIdx = app.state.vehicles.findIndex(v => v.plate === app.state.vehicle);
                 if (vIdx >= 0) {
-                    this.state.vehicles[vIdx].lastChecklistDate = this.getTodayStr();
+                    app.state.vehicles[vIdx].lastChecklistDate = app.getTodayStr();
                 }
             }
 
-            this.state.preRouteData = data;
-            this.state.preRouteCompleted = true;
-            this.saveState(); 
-            this.renderVehiclesList();
+            app.state.preRouteData = data;
+            app.state.preRouteCompleted = true;
+            app.saveState(); 
+            app.renderVehiclesList();
 
             setTimeout(() => {
-                this.switchTab('view-dashboard', document.querySelector('.nav-tab.active'));
-                btnText.innerHTML = 'Salvar Pré-Rota e Capturar GPS';
+                app.switchTab('view-dashboard', document.querySelector('.nav-tab.active'));
+                btnText.innerHTML = 'Salvar Pré-Rota';
+                btnText.parentElement.disabled = false;
             }, 1500);
 
         } catch (error) {
-            this.showToast(error.message || 'Erro inesperado.', 'error');
-            btnText.innerHTML = 'Salvar Pré-Rota e Capturar GPS';
+            app.showToast(error.message || 'Erro inesperado.', 'error');
+            btnText.innerHTML = 'Salvar Pré-Rota';
+            btnText.parentElement.disabled = false;
         }
     },
 
@@ -1328,40 +1361,46 @@ const app = {
         const clientName = document.getElementById('client-name').value;
         
         if(!clientName || clientName.trim() === '') {
-            this.showToast('⚠️ Informe o nome do Ponto de Coleta/Cliente.', 'warning');
+            app.showToast('⚠️ Informe o nome do Ponto de Coleta/Cliente.', 'warning');
             return;
         }
 
         if (!form.checkValidity()) {
-            this.showToast('⚠️ Responda todas as perguntas obrigatórias do formulário.', 'warning');
+            app.showToast('⚠️ Responda todas as perguntas obrigatórias do formulário.', 'warning');
             try { form.reportValidity(); } catch(e){}
             return;
         }
 
         const btnText = document.getElementById('btn-col-text');
         const originalText = btnText.innerHTML;
+        const btnParent1 = btnText;
+        const btnParent2 = btnText.previousElementSibling;
+        
+        // Anti-spam / Duplo clique lock
+        btnParent1.disabled = true;
+        btnParent2.disabled = true;
         btnText.innerHTML = '<div class="loader"></div> Salvando...';
 
         try {
-            const geo = await this.getGeolocation();
             const formData = new FormData(form);
             const data = {
                 id: Date.now(),
                 client: clientName,
                 timestamp: new Date().toLocaleString('pt-BR'),
-                location: geo,
                 q1: formData.get('col_q1'),
                 q2: formData.get('col_q2'),
                 temp: document.getElementById('col_temp').value,
                 q4: formData.get('col_q4')
             };
 
-            this.state.collections.push(data);
-            this.saveState();
+            app.state.collections.push(data);
+            app.saveState();
             
-            this.showToast(`Coleta em ${clientName} salva com sucesso!`, 'success');
+            app.showToast(`Coleta em ${clientName} salva com sucesso!`, 'success');
             
             setTimeout(() => {
+                btnParent1.disabled = false;
+                btnParent2.disabled = false;
                 if(stayOnPage) {
                     form.reset();
                     document.getElementById('client-name').value = '';
@@ -1369,20 +1408,30 @@ const app = {
                     window.scrollTo({top: 0, behavior: 'smooth'});
                     btnText.innerHTML = originalText;
                 } else {
-                    this.switchTab('view-dashboard', document.querySelector('.nav-tab.active'));
+                    app.switchTab('view-dashboard', document.querySelector('.nav-tab.active'));
                     btnText.innerHTML = 'Salvar e Voltar';
                 }
             }, 1000);
 
         } catch (error) {
-            this.showToast(error.message, 'error');
+            app.showToast(error.message, 'error');
             btnText.innerHTML = originalText;
+            btnParent1.disabled = false;
+            btnParent2.disabled = false;
         }
     },
 
     finishRoute: function() {
-        if (!this.state.preRouteCompleted) {
-            this.showToast('Conclua o Pré-Rota primeiro.', 'error');
+        const selectedVehicleObj = this.state.vehicles.find(v => v.plate === this.state.vehicle);
+        const hasPreRouteToday = selectedVehicleObj && selectedVehicleObj.lastChecklistDate === this.getTodayStr();
+
+        if (!this.state.preRouteCompleted && !hasPreRouteToday) {
+            app.showToast('Conclua o Pré-Rota primeiro.', 'error');
+            return;
+        }
+        
+        if (this.state.collections.length === 0 && !this.state.preRouteCompleted) {
+            app.showToast('Nenhuma coleta registrada para finalizar.', 'warning');
             return;
         }
 
@@ -1390,37 +1439,36 @@ const app = {
             "Finalizar Rota", 
             "Deseja encerrar a rota atual? O relatório será salvo e enviado para a nuvem automaticamente. A tela de operação será limpa.",
             () => {
+                const fallbackPreRoute = { 
+                    timestamp: "Realizado em rota anterior (Hoje)", 
+                    q1: "Conforme", q2: "Conforme", q3: "Conforme", 
+                    q4: "Conforme", q5: "Conforme", q6: "Conforme" 
+                };
+
                 const record = {
+                    action: 'save_history',
                     id: Date.now(),
                     date: new Date().toISOString(),
                     driver: this.state.driver,
                     vehicle: this.state.vehicle,
-                    preRouteData: this.state.preRouteData,
+                    preRouteData: this.state.preRouteData || fallbackPreRoute,
                     collections: [...this.state.collections],
                     blocked: this.state.routeBlocked
                 };
 
-                this.showToast('Enviando relatório para a nuvem...', 'default');
+                app.showToast('Enviando relatório para a nuvem...', 'default');
                 
-                // ==========================================
-                // FUNÇÃO QUE ENVIA DADOS PARA O GOOGLE SHEETS
-                // ==========================================
-                if(GOOGLE_SHEETS_URL !== "COLE_AQUI_A_URL_DO_SEU_GOOGLE_APPS_SCRIPT") {
-                    fetch(GOOGLE_SHEETS_URL, {
-                        method: 'POST',
-                        // Usamos text/plain para não dar bloqueio de CORS no navegador
-                        headers: { 'Content-Type': 'text/plain;charset=utf-8' }, 
-                        body: JSON.stringify(record)
-                    }).then(res => res.json())
-                      .then(data => {
-                         this.showToast('Rota finalizada e salva na Planilha do Google!', 'success');
-                      }).catch(err => {
-                         console.error(err);
-                         this.showToast('Erro de internet. Salvo apenas offline no celular.', 'warning');
-                      });
-                } else {
-                    this.showToast('Rota finalizada (Sem integração com nuvem).', 'success');
-                }
+                fetch(GOOGLE_SHEETS_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }, 
+                    body: JSON.stringify(record)
+                }).then(res => res.json())
+                  .then(data => {
+                     app.showToast('Rota finalizada e salva na Planilha do Google!', 'success');
+                  }).catch(err => {
+                     console.error(err);
+                     app.showToast('Erro de internet. Salvo apenas offline no celular.', 'warning');
+                  });
 
                 this.state.history.unshift(record); 
                 
@@ -1436,19 +1484,88 @@ const app = {
                 this.saveState(); 
                 this.updateUI();
                 this.renderHistory();
-                
-                this.showToast('Rota finalizada e enviada para a nuvem com sucesso!', 'success');
             }
         );
     },
 
+    generateCertificate: function(empId) {
+        const emp = this.state.drivers.find(d => d.id === empId);
+        if(!emp) return;
+
+        app.showToast('Gerando certificado...', 'success');
+        const container = document.getElementById('pdf-container');
+        
+        const html = `
+            <div style="padding: 30px; font-family: 'Inter', sans-serif; color: #1e293b; max-width: 800px; margin: 0 auto; border: 2px solid #cbd5e1; border-radius: 8px;">
+                <div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #2563eb; padding-bottom: 20px;">
+                    <h1 style="color: #1e3a8a; margin: 0; font-size: 28px; letter-spacing: 2px;">ANALOG</h1>
+                    <h2 style="color: #475569; margin: 10px 0 0 0; font-size: 18px; font-weight: 500;">Comprovante de Treinamento e Capacitação</h2>
+                </div>
+                
+                <p style="font-size: 14px; line-height: 1.6; text-align: justify; margin-bottom: 30px;">
+                    Declaramos para os devidos fins legais e de fiscalização que o colaborador(a) identificado(a) abaixo concluiu com êxito o treinamento exigido para o transporte de materiais biológicos, em conformidade com as diretrizes e normas sanitárias vigentes (incluindo as orientações da RDC ANVISA 504/2021).
+                </p>
+                
+                <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin-bottom: 30px;">
+                    <p style="margin: 0 0 10px 0; font-size: 14px;"><strong>Nome do(a) Profissional:</strong> ${emp.name}</p>
+                    <p style="margin: 0 0 10px 0; font-size: 14px;"><strong>Identificação (ID/Matrícula):</strong> ${emp.id}</p>
+                    <p style="margin: 0 0 10px 0; font-size: 14px;"><strong>Data de Realização do Treinamento:</strong> ${this.formatDate(emp.trainingDate)}</p>
+                    <p style="margin: 0; font-size: 14px;"><strong>Válido até:</strong> ${this.formatDate(emp.expiryDate)}</p>
+                </div>
+                
+                <p style="font-size: 14px; line-height: 1.6; text-align: justify; margin-bottom: 50px;">
+                    O treinamento abordou procedimentos operacionais padrão, manuseio seguro, controle de temperatura, uso adequado de EPIs, resposta a incidentes/derramamentos e correto preenchimento de documentação, capacitando o profissional para a operação e condução segura das cargas.
+                </p>
+                
+                <div style="text-align: right; font-size: 14px; margin-bottom: 60px;">
+                    Local e Data: ________________________, ${new Date().toLocaleDateString('pt-BR')}
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; margin-top: 40px;">
+                    <div style="text-align: center; width: 45%;">
+                        <div style="border-top: 1px solid #000; margin-bottom: 5px;"></div>
+                        <strong style="font-size: 12px;">ANALOG</strong><br>
+                        <span style="font-size: 11px; color: #64748b;">Responsável Técnico / Instrutor</span>
+                    </div>
+                    <div style="text-align: center; width: 45%;">
+                        <div style="border-top: 1px solid #000; margin-bottom: 5px;"></div>
+                        <strong style="font-size: 12px;">${emp.name}</strong><br>
+                        <span style="font-size: 11px; color: #64748b;">Assinatura do Profissional Capacitado</span>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        container.innerHTML = html;
+        container.style.display = 'block';
+        
+        const opt = {
+            margin:       15,
+            filename:     `Certificado_${emp.name.replace(/\s+/g, '_')}.pdf`,
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2 },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+        
+        html2pdf().set(opt).from(container).save().then(() => {
+            container.style.display = 'none';
+        });
+    },
+
     generatePDF: function(record) {
-        this.showToast('Baixando relatório PDF...', 'success');
+        app.showToast('Baixando relatório PDF...', 'success');
         const container = document.getElementById('pdf-container');
         
         const driverObj = this.state.drivers.find(d => d.id === record.driver) || { name: 'Não Identificado', expiryDate: 'N/A' };
         const vehicleObj = this.state.vehicles.find(v => v.plate === record.vehicle) || { model: 'Não Identificado' };
-        const dataStr = new Date(record.date).toLocaleDateString('pt-BR');
+        
+        // Conversão de data protegida
+        let dataStr = 'Data Indisponível';
+        if(record.date) {
+            dataStr = new Date(record.date).toLocaleDateString('pt-BR');
+        }
+
+        const preData = record.preRouteData || {}; // Proteção caso falte o preRouteData
         
         let html = `
             <div style="text-align: center; border-bottom: 2px solid #2563eb; padding-bottom: 10px; margin-bottom: 15px;">
@@ -1474,71 +1591,57 @@ const app = {
             <table style="width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 20px; font-family: sans-serif;">
                 <tr>
                     <td colspan="2" style="border: 1px solid #cbd5e1; padding: 6px; background: #f1f5f9; color: #334155;">
-                        <strong>Data/Hora de Início:</strong> ${record.preRouteData.timestamp} &nbsp;|&nbsp; <strong>GPS:</strong> Lat ${record.preRouteData.location.lat.toFixed(5)}, Lng ${record.preRouteData.location.lng.toFixed(5)}
+                        <strong>Data/Hora de Início:</strong> ${preData.timestamp || 'N/A'}
                     </td>
                 </tr>
-                <tr><td style="border: 1px solid #cbd5e1; padding: 6px; width: 75%;">1. Compartimento de carga limpo e com superfícies lisas/laváveis?</td><td style="border: 1px solid #cbd5e1; padding: 6px; text-align: center;"><strong>${record.preRouteData.q1 || 'N/A'}</strong></td></tr>
-                <tr><td style="border: 1px solid #cbd5e1; padding: 6px;">2. Identificação externa de Risco Biológico em bom estado?</td><td style="border: 1px solid #cbd5e1; padding: 6px; text-align: center;"><strong>${record.preRouteData.q2 || 'N/A'}</strong></td></tr>
-                <tr><td style="border: 1px solid #cbd5e1; padding: 6px;">3. Kit de Derramamento completo e na validade (Item Crítico)?</td><td style="border: 1px solid #cbd5e1; padding: 6px; text-align: center; color: ${record.preRouteData.q3 === 'Não Conforme' ? 'red' : 'inherit'}"><strong>${record.preRouteData.q3 || 'N/A'}</strong></td></tr>
-                <tr><td style="border: 1px solid #cbd5e1; padding: 6px;">4. EPIs do motorista disponíveis (luvas, óculos, jaleco, máscara)?</td><td style="border: 1px solid #cbd5e1; padding: 6px; text-align: center;"><strong>${record.preRouteData.q4 || 'N/A'}</strong></td></tr>
-                <tr><td style="border: 1px solid #cbd5e1; padding: 6px;">5. Caixas térmicas íntegras e higienizadas?</td><td style="border: 1px solid #cbd5e1; padding: 6px; text-align: center;"><strong>${record.preRouteData.q5 || 'N/A'}</strong></td></tr>
-                <tr><td style="border: 1px solid #cbd5e1; padding: 6px;">6. Termômetros/dataloggers calibrados e ligados?</td><td style="border: 1px solid #cbd5e1; padding: 6px; text-align: center;"><strong>${record.preRouteData.q6 || 'N/A'}</strong></td></tr>
+                <tr><td style="border: 1px solid #cbd5e1; padding: 6px; width: 75%;">1. Compartimento de carga limpo e com superfícies lisas/laváveis?</td><td style="border: 1px solid #cbd5e1; padding: 6px; text-align: center;"><strong>${preData.q1 || 'N/A'}</strong></td></tr>
+                <tr><td style="border: 1px solid #cbd5e1; padding: 6px;">2. Identificação externa de Risco Biológico em bom estado?</td><td style="border: 1px solid #cbd5e1; padding: 6px; text-align: center;"><strong>${preData.q2 || 'N/A'}</strong></td></tr>
+                <tr><td style="border: 1px solid #cbd5e1; padding: 6px;">3. Kit de Derramamento completo e na validade (Item Crítico)?</td><td style="border: 1px solid #cbd5e1; padding: 6px; text-align: center; color: ${preData.q3 === 'Não Conforme' ? 'red' : 'inherit'}"><strong>${preData.q3 || 'N/A'}</strong></td></tr>
+                <tr><td style="border: 1px solid #cbd5e1; padding: 6px;">4. EPIs do motorista disponíveis (luvas, óculos, jaleco, máscara)?</td><td style="border: 1px solid #cbd5e1; padding: 6px; text-align: center;"><strong>${preData.q4 || 'N/A'}</strong></td></tr>
+                <tr><td style="border: 1px solid #cbd5e1; padding: 6px;">5. Caixas térmicas íntegras e higienizadas?</td><td style="border: 1px solid #cbd5e1; padding: 6px; text-align: center;"><strong>${preData.q5 || 'N/A'}</strong></td></tr>
+                <tr><td style="border: 1px solid #cbd5e1; padding: 6px;">6. Termômetros/dataloggers calibrados e ligados?</td><td style="border: 1px solid #cbd5e1; padding: 6px; text-align: center;"><strong>${preData.q6 || 'N/A'}</strong></td></tr>
             </table>
-        `;
-        
-        if (record.collections.length > 0) {
-            html += `<h2 style="font-size: 15px; background: #e2e8f0; padding: 6px 10px; font-family: sans-serif; border-radius: 4px; margin-bottom: 10px;">2. Registro de Coletas Realizadas (${record.collections.length})</h2>`;
-            record.collections.forEach((col, index) => {
-                html += `
-                <div style="margin-bottom:12px; border:1px solid #cbd5e1; padding:10px; border-radius: 4px; font-family: sans-serif; font-size: 11px; page-break-inside: avoid;">
-                    <div style="border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; margin-bottom: 6px;">
-                        <strong style="font-size: 13px; color: #1d4ed8;">#${index + 1} - Cliente / Ponto: ${col.client}</strong>
-                    </div>
-                    <table style="width: 100%; border-collapse: collapse;">
-                        <tr>
-                            <td style="padding: 3px; width: 60%;"><strong>Data/Hora:</strong> ${col.timestamp}</td>
-                            <td style="padding: 3px;"><strong>Temp. Aferida:</strong> <span style="background: #eff6ff; padding: 2px 6px; border-radius: 4px; font-weight: bold; border: 1px solid #bfdbfe;">${col.temp}°C</span></td>
-                        </tr>
-                        <tr><td style="padding: 3px; color: #475569;" colspan="2"><strong>GPS Local:</strong> Lat ${col.location.lat.toFixed(5)}, Lng ${col.location.lng.toFixed(5)}</td></tr>
-                        <tr><td style="padding: 3px; padding-top: 6px;" colspan="2"><strong>Embalagem Tripla (Primária, Secundária e Terciária):</strong> ${col.q1 || 'N/A'}</td></tr>
-                        <tr><td style="padding: 3px;" colspan="2"><strong>Identificação Externa Correta (Símbolos)?</strong> ${col.q2 || 'N/A'}</td></tr>
-                        <tr><td style="padding: 3px;" colspan="2"><strong>Documentação/Manifesto Entregue?</strong> ${col.q4 || 'N/A'}</td></tr>
-                    </table>
-                </div>`;
-            });
-        } else {
-            html += `<p style="font-family: sans-serif; font-size: 12px; color: #64748b; padding: 10px; border: 1px dashed #cbd5e1; border-radius: 4px;">Nenhuma coleta registrada nesta rota.</p>`;
-        }
 
-        html += `
-            <div style="margin-top: 40px; text-align: center; font-family: sans-serif; font-size: 12px; page-break-inside: avoid;">
-                <table style="width: 100%; border-collapse: collapse; margin-top: 30px;">
-                    <tr>
-                        <td style="width: 50%; padding: 10px;">
-                            <div style="border-top: 1px solid #000; width: 80%; margin: 0 auto; padding-top: 5px;">
-                                <strong>Assinatura do Motorista</strong><br><span style="color: #475569;">${driverObj.name}</span>
-                            </div>
-                        </td>
-                        <td style="width: 50%; padding: 10px;">
-                            <div style="border-top: 1px solid #000; width: 80%; margin: 0 auto; padding-top: 5px;">
-                                <strong>Responsável Técnico / Supervisor</strong><br><span style="color: #475569;">Conferido por</span>
-                            </div>
-                        </td>
-                    </tr>
-                </table>
-                <p style="margin-top: 20px; color: #94a3b8; font-size: 10px;">Documento gerado eletronicamente - BioLogistics App</p>
-            </div>
+            <h2 style="font-size: 15px; background: #e2e8f0; padding: 6px 10px; font-family: sans-serif; border-radius: 4px; margin-bottom: 10px;">2. Checklist de Coletas (${(record.collections || []).length} Registros)</h2>
         `;
+
+        if(!record.collections || record.collections.length === 0) {
+            html += `<p style="font-size: 12px; font-family: sans-serif; color: #64748b; font-style: italic;">Nenhuma coleta registrada nesta rota.</p>`;
+        } else {
+            html += `<table style="width: 100%; border-collapse: collapse; font-size: 11px; font-family: sans-serif;">
+                <thead>
+                    <tr style="background: #f1f5f9; color: #334155;">
+                        <th style="border: 1px solid #cbd5e1; padding: 6px; text-align: left;">Cliente/Local</th>
+                        <th style="border: 1px solid #cbd5e1; padding: 6px; text-align: center;">Hora</th>
+                        <th style="border: 1px solid #cbd5e1; padding: 6px; text-align: center;">Temp (°C)</th>
+                        <th style="border: 1px solid #cbd5e1; padding: 6px; text-align: center;">Emb. Tripla</th>
+                        <th style="border: 1px solid #cbd5e1; padding: 6px; text-align: center;">Id. Externa</th>
+                        <th style="border: 1px solid #cbd5e1; padding: 6px; text-align: center;">Documentação</th>
+                    </tr>
+                </thead>
+                <tbody>`;
+            record.collections.forEach(c => {
+                html += `<tr>
+                    <td style="border: 1px solid #cbd5e1; padding: 6px;"><strong>${c.client}</strong></td>
+                    <td style="border: 1px solid #cbd5e1; padding: 6px; text-align: center;">${c.timestamp.split(' ')[1] || c.timestamp}</td>
+                    <td style="border: 1px solid #cbd5e1; padding: 6px; text-align: center; color: #1d4ed8; font-weight: bold;">${c.temp}</td>
+                    <td style="border: 1px solid #cbd5e1; padding: 6px; text-align: center;">${c.q1}</td>
+                    <td style="border: 1px solid #cbd5e1; padding: 6px; text-align: center;">${c.q2}</td>
+                    <td style="border: 1px solid #cbd5e1; padding: 6px; text-align: center;">${c.q4}</td>
+                </tr>`;
+            });
+            html += `</tbody></table>`;
+        }
 
         container.innerHTML = html;
         container.style.display = 'block';
 
-        var opt = {
-            margin: 10,
-            filename: `Auditoria_RDC504_${record.vehicle}_${new Date(record.date).toISOString().slice(0,10)}.pdf`,
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2, useCORS: true },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        const opt = {
+            margin:       10,
+            filename:     `Relatorio_Biologico_${record.vehicle}_${dataStr.replace(/\//g, '-')}.pdf`,
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2 },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
 
         html2pdf().set(opt).from(container).save().then(() => {
@@ -1546,129 +1649,132 @@ const app = {
         });
     },
 
-    exportHistoryCSV: function() {
-        if (this.state.history.length === 0) {
-            this.showToast('Não há dados no histórico para exportar.', 'warning');
-            return;
-        }
-        this.showToast('Gerando arquivo CSV...', 'success');
-
-        let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; 
-        csvContent += "ID_Relatorio,Data,Hora,Motorista_ID,Placa_Veiculo,Status_Rota,Qtd_Coletas,Q1_Limpeza,Q2_Identificacao,Q3_KitDerramamento,Q4_EPIs,Q5_CaixasTermicas,Q6_Termometros,Lat_PreRota,Lng_PreRota\r\n";
-
-        this.state.history.forEach(h => {
-            const dateObj = new Date(h.date);
-            const dataStr = dateObj.toLocaleDateString('pt-BR');
-            const horaStr = dateObj.toLocaleTimeString('pt-BR');
-            const status = h.blocked ? 'Bloqueada' : 'Liberada';
-            const qtdCol = h.collections ? h.collections.length : 0;
-            const pr = h.preRouteData || {};
-            const loc = pr.location || { lat: '', lng: '' };
-
-            const row = [
-                h.id, dataStr, horaStr, h.driver, h.vehicle, status, qtdCol,
-                pr.q1 || '', pr.q2 || '', pr.q3 || '', pr.q4 || '', pr.q5 || '', pr.q6 || '', loc.lat, loc.lng
-            ];
-
-            const escapedRow = row.map(field => {
-                if (field === null || field === undefined) return '';
-                const stringField = String(field);
-                if (stringField.includes(',') || stringField.includes('"') || stringField.includes('\n')) {
-                    return `"${stringField.replace(/"/g, '""')}"`;
-                }
-                return stringField;
-            });
-            csvContent += escapedRow.join(",") + "\r\n";
-        });
-
-        const encodedUri = encodeURI(csvContent);
-        const link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", `Historico_BioLogistics_${this.getTodayStr()}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    },
-
     renderHistory: function() {
         const tbody = document.getElementById('history-tbody');
-        if (!tbody) return;
+        let htmlContent = '';
         
-        if (this.state.history.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" class="text-center py-6 text-gray-500">Nenhum relatório salvo ainda.</td></tr>';
-            return;
-        }
-
-        let htmlContent = ''; 
-
         this.state.history.forEach(h => {
-            const dateObj = new Date(h.date);
+            // Filtro de Segurança
+            if (!h || !h.id || !h.date) return;
+
+            let dateStr = "Data Indisponível";
+            let timeStr = "";
+            try {
+                const dObj = new Date(h.date);
+                if (!isNaN(dObj.getTime())) {
+                    dateStr = dObj.toLocaleDateString('pt-BR');
+                    timeStr = dObj.toLocaleTimeString('pt-BR');
+                }
+            } catch(e){}
+
+            const collectionsCount = h.collections ? h.collections.length : 0;
             const statusHtml = h.blocked 
                 ? '<span class="bg-red-100 text-red-800 text-xs font-bold px-2 py-1 rounded">Bloqueada</span>' 
                 : '<span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2 py-1 rounded">Concluída</span>';
-
+            
             htmlContent += `
                 <tr>
-                    <td class="text-sm">${dateObj.toLocaleDateString('pt-BR')}<br><span class="text-xs text-gray-500">${dateObj.toLocaleTimeString('pt-BR')}</span></td>
-                    <td class="font-medium">${h.vehicle}<br><span class="text-xs text-gray-500">${h.driver}</span></td>
-                    <td class="text-center font-bold">${h.collections ? h.collections.length : 0}</td>
+                    <td class="text-sm">${dateStr}<br><span class="text-xs text-gray-500">${timeStr}</span></td>
+                    <td class="font-medium">${h.vehicle || 'Sem Placa'} <br><span class="text-xs text-gray-500">${h.driver || 'Não Identificado'}</span></td>
+                    <td class="text-center">${collectionsCount}</td>
                     <td>${statusHtml}</td>
                     <td>
-                        <button onclick="app.generatePDF(app.state.history.find(x => x.id === ${h.id}))" class="text-blue-600 hover:text-blue-900 bg-blue-50 px-3 py-1 rounded border border-blue-200 text-sm font-medium transition-colors">
-                            <i class="fa-solid fa-download mr-1"></i> PDF
+                        <button onclick='app.generatePDF(${JSON.stringify(h).replace(/'/g, "&#39;")})' class="text-blue-600 hover:text-blue-900 bg-blue-50 px-3 py-1 rounded border border-blue-200 text-sm font-medium transition-colors">
+                            <i class="fa-solid fa-file-pdf mr-1"></i> PDF
                         </button>
                     </td>
                 </tr>
             `;
         });
-        
-        tbody.innerHTML = htmlContent; 
+        tbody.innerHTML = htmlContent;
     },
 
-    getFilteredHistory: function() {
-        const period = document.getElementById('dash-period-select').value;
-        if (period === 'all') return this.state.history;
+    exportHistoryCSV: function() {
+        if(this.state.history.length === 0) {
+            app.showToast('Nenhum dado para exportar.', 'warning');
+            return;
+        }
 
-        const days = parseInt(period);
-        const limitDate = new Date();
-        limitDate.setDate(limitDate.getDate() - days);
-        limitDate.setHours(0, 0, 0, 0);
+        let csvContent = "data:text/csv;charset=utf-8,";
+        csvContent += "ID Rota,Data,Hora,Motorista,Veiculo,Status,Qtd Coletas\n";
 
-        return this.state.history.filter(h => new Date(h.date) >= limitDate);
+        this.state.history.forEach(h => {
+            if(!h || !h.id) return; // Segurança
+
+            let dataStr = "";
+            let horaStr = "";
+            try {
+                const dObj = new Date(h.date);
+                if (!isNaN(dObj.getTime())) {
+                    dataStr = dObj.toLocaleDateString('pt-BR');
+                    horaStr = dObj.toLocaleTimeString('pt-BR');
+                }
+            } catch(e){}
+
+            const cols = h.collections ? h.collections.length : 0;
+            const status = h.blocked ? "Bloqueada" : "Liberada";
+            csvContent += `${h.id},${dataStr},${horaStr},${h.driver},${h.vehicle},${status},${cols}\n`;
+        });
+
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `Historico_Rotas_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     },
 
     renderDashboard: function() {
-        const filteredData = this.getFilteredHistory();
+        const periodDays = document.getElementById('dash-period-select').value;
+        const now = new Date();
         
-        let totalRotas = filteredData.length;
-        let rotasLiberadas = 0;
-        let rotasBloqueadas = 0;
-        let totalColetas = 0;
-        
-        const ncCounts = {
-            'Q1 - Limpeza': 0, 'Q2 - Identificação Ext.': 0, 'Q3 - Kit Derramamento': 0,
-            'Q4 - EPIs Motorista': 0, 'Q5 - Caixas Térmicas': 0, 'Q6 - Termômetros': 0
-        };
-        const coletasPorDiaMap = {};
-
-        filteredData.forEach(h => {
-            if (h.blocked) rotasBloqueadas++;
-            else rotasLiberadas++;
+        let filteredHistory = this.state.history.filter(h => {
+            if(!h || !h.date) return false;
+            if(periodDays === 'all') return true;
             
-            if (h.collections) totalColetas += h.collections.length;
+            const hDate = new Date(h.date);
+            if(isNaN(hDate.getTime())) return false; // Ignora datas inválidas
+            
+            const diffTime = Math.abs(now - hDate);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            return diffDays <= parseInt(periodDays);
+        });
 
-            if (h.preRouteData) {
-                if(h.preRouteData.q1 === 'Não Conforme') ncCounts['Q1 - Limpeza']++;
-                if(h.preRouteData.q2 === 'Não Conforme') ncCounts['Q2 - Identificação Ext.']++;
-                if(h.preRouteData.q3 === 'Não Conforme') ncCounts['Q3 - Kit Derramamento']++;
-                if(h.preRouteData.q4 === 'Não Conforme') ncCounts['Q4 - EPIs Motorista']++;
-                if(h.preRouteData.q5 === 'Não Conforme') ncCounts['Q5 - Caixas Térmicas']++;
-                if(h.preRouteData.q6 === 'Não Conforme') ncCounts['Q6 - Termômetros']++;
+        // 1. Calcular KPIs Básicos
+        let totalRotas = filteredHistory.length;
+        let rotasLiberadas = filteredHistory.filter(h => !h.blocked).length;
+        let rotasBloqueadas = filteredHistory.filter(h => h.blocked).length;
+        
+        let totalColetas = 0;
+        let ncCount = { q1: 0, q2: 0, q3: 0, q4: 0, q5: 0, q6: 0 };
+        
+        // Estrutura para agrupar datas (DD/MM/YYYY) e ordenar
+        let coletasPorDataMap = {};
+
+        filteredHistory.forEach(h => {
+            if(h.collections) totalColetas += h.collections.length;
+            
+            if(h.preRouteData) {
+                if(h.preRouteData.q1 === 'Não Conforme') ncCount.q1++;
+                if(h.preRouteData.q2 === 'Não Conforme') ncCount.q2++;
+                if(h.preRouteData.q3 === 'Não Conforme') ncCount.q3++;
+                if(h.preRouteData.q4 === 'Não Conforme') ncCount.q4++;
+                if(h.preRouteData.q5 === 'Não Conforme') ncCount.q5++;
+                if(h.preRouteData.q6 === 'Não Conforme') ncCount.q6++;
             }
 
-            const dateStr = new Date(h.date).toLocaleDateString('pt-BR');
-            if(!coletasPorDiaMap[dateStr]) coletasPorDiaMap[dateStr] = 0;
-            if(h.collections) coletasPorDiaMap[dateStr] += h.collections.length;
+            if(h.collections && h.collections.length > 0) {
+                const dateKeyObj = new Date(h.date);
+                // Zerando horas para agrupar pelo dia corretamente
+                dateKeyObj.setHours(0,0,0,0); 
+                const ts = dateKeyObj.getTime();
+                
+                if(!coletasPorDataMap[ts]) {
+                    coletasPorDataMap[ts] = 0;
+                }
+                coletasPorDataMap[ts] += h.collections.length;
+            }
         });
 
         document.getElementById('kpi-total-rotas').textContent = totalRotas;
@@ -1676,134 +1782,141 @@ const app = {
         document.getElementById('kpi-rotas-bloqueadas').textContent = rotasBloqueadas;
         document.getElementById('kpi-total-coletas').textContent = totalColetas;
 
-        this.renderChartStatus(rotasLiberadas, rotasBloqueadas);
-        this.renderChartColetas(coletasPorDiaMap);
-        this.renderNCTable(ncCounts);
-    },
-
-    renderChartStatus: function(liberadas, bloqueadas) {
-        const ctx = document.getElementById('chartStatusRotas');
-        if(!ctx) return;
-        
-        if (this.charts.statusRotas) {
-            this.charts.statusRotas.destroy();
-        }
-
-        const dataValues = (liberadas === 0 && bloqueadas === 0) ? [1] : [liberadas, bloqueadas];
-        const bgColors = (liberadas === 0 && bloqueadas === 0) ? ['#e5e7eb'] : ['#10b981', '#ef4444'];
-        const labels = (liberadas === 0 && bloqueadas === 0) ? ['Sem Dados'] : ['Liberadas', 'Bloqueadas'];
-
-        this.charts.statusRotas = new Chart(ctx, {
+        // 2. Gráfico 1: Status Rotas (Pizza)
+        const ctxStatus = document.getElementById('chartStatusRotas').getContext('2d');
+        if(this.charts.status) this.charts.status.destroy();
+        this.charts.status = new Chart(ctxStatus, {
             type: 'doughnut',
-            data: { labels: labels, datasets: [{ data: dataValues, backgroundColor: bgColors, borderWidth: 0, hoverOffset: 4 }] },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
-        });
-    },
-
-    renderChartColetas: function(coletasPorDiaMap) {
-        const ctx = document.getElementById('chartColetasDia');
-        if(!ctx) return;
-
-        if (this.charts.coletasDia) {
-            this.charts.coletasDia.destroy();
-        }
-
-        const sortedDates = Object.keys(coletasPorDiaMap).sort((a, b) => {
-            const dateA = new Date(a.split('/').reverse().join('-'));
-            const dateB = new Date(b.split('/').reverse().join('-'));
-            return dateA - dateB;
+            data: {
+                labels: ['Liberadas', 'Bloqueadas (Crítico)'],
+                datasets: [{
+                    data: [rotasLiberadas, rotasBloqueadas],
+                    backgroundColor: ['#10b981', '#ef4444'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom' } },
+                cutout: '70%'
+            }
         });
 
-        const labels = sortedDates;
-        const data = sortedDates.map(date => coletasPorDiaMap[date]);
+        // 3. Gráfico 2: Volume de Coletas (Barra - Mais estável para 1 dia de dado e cronológico)
+        const sortedTimestamps = Object.keys(coletasPorDataMap).sort((a,b) => a - b);
+        const labelsData = [];
+        const valuesData = [];
+        
+        sortedTimestamps.forEach(ts => {
+            const d = new Date(parseInt(ts));
+            labelsData.push(`${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')}`);
+            valuesData.push(coletasPorDataMap[ts]);
+        });
 
-        this.charts.coletasDia = new Chart(ctx, {
+        const ctxColetas = document.getElementById('chartColetasDia').getContext('2d');
+        if(this.charts.coletas) this.charts.coletas.destroy();
+        this.charts.coletas = new Chart(ctxColetas, {
             type: 'bar',
             data: {
-                labels: labels.length > 0 ? labels : ['Nenhuma Coleta'],
-                datasets: [{ label: 'Qtd. Coletas', data: data.length > 0 ? data : [0], backgroundColor: '#8b5cf6', borderRadius: 4 }]
+                labels: labelsData.length > 0 ? labelsData : ['Sem dados'],
+                datasets: [{
+                    label: 'Coletas',
+                    data: valuesData.length > 0 ? valuesData : [0],
+                    backgroundColor: '#3b82f6',
+                    borderRadius: 4
+                }]
             },
-            options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }, plugins: { legend: { display: false } } }
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { 
+                    y: { beginAtZero: true, ticks: { stepSize: 1 } },
+                    x: { grid: { display: false } }
+                }
+            }
         });
-    },
 
-    renderNCTable: function(ncCounts) {
-        const tbody = document.getElementById('dash-nc-tbody');
-        const ncArray = Object.keys(ncCounts).map(key => ({ item: key, count: ncCounts[key] })).sort((a, b) => b.count - a.count);
+        // 4. Tabela de Ranking de NC
+        const ncItems = [
+            { label: 'Q1. Limpeza Compartimento', count: ncCount.q1 },
+            { label: 'Q2. Identificação Externa', count: ncCount.q2 },
+            { label: 'Q3. Kit Derramamento (CRÍTICO)', count: ncCount.q3 },
+            { label: 'Q4. EPIs Disponíveis', count: ncCount.q4 },
+            { label: 'Q5. Caixas Térmicas', count: ncCount.q5 },
+            { label: 'Q6. Termômetros', count: ncCount.q6 }
+        ];
+        ncItems.sort((a,b) => b.count - a.count);
 
-        let hasNC = false;
-        let htmlContent = ''; 
-
-        ncArray.forEach(nc => {
-            if (nc.count > 0) {
-                hasNC = true;
-                const isCritical = nc.item.includes('Q3');
-                htmlContent += `
+        const tbodyNC = document.getElementById('dash-nc-tbody');
+        tbodyNC.innerHTML = '';
+        ncItems.forEach(item => {
+            if(item.count > 0) {
+                const isCritico = item.label.includes('CRÍTICO') ? 'text-red-600 font-bold' : '';
+                tbodyNC.innerHTML += `
                     <tr>
-                        <td class="font-medium text-slate-700 ${isCritical ? 'text-red-600' : ''}">
-                            ${isCritical ? '<i class="fa-solid fa-triangle-exclamation mr-1"></i> ' : ''}${nc.item}
-                        </td>
-                        <td class="text-center font-bold text-slate-800">${nc.count}</td>
+                        <td class="${isCritico}">${item.label}</td>
+                        <td class="text-center font-bold text-gray-700">${item.count}</td>
                     </tr>
                 `;
             }
         });
-
-        if (!hasNC) {
-            tbody.innerHTML = '<tr><td colspan="2" class="text-center py-4 text-emerald-600 font-medium">Nenhuma não conformidade registrada neste período.</td></tr>';
-        } else {
-            tbody.innerHTML = htmlContent; 
+        if(tbodyNC.innerHTML === '') {
+            tbodyNC.innerHTML = '<tr><td colspan="2" class="text-center text-gray-500 italic py-4">Nenhuma Não Conformidade no período. Ótimo trabalho!</td></tr>';
         }
     },
 
-    showToast: function(message, type = 'default') {
-        const toast = document.getElementById("toast");
-        toast.textContent = message;
-        toast.className = "show " + type;
-        setTimeout(() => toast.className = toast.className.replace("show", ""), 3500);
+    showToast: function(msg, type = 'default') {
+        const toast = document.getElementById('toast');
+        toast.className = '';
+        toast.classList.add('show');
+        if (type === 'error') toast.classList.add('error');
+        if (type === 'success') toast.classList.add('success');
+        if (type === 'warning') toast.classList.add('warning');
+        toast.textContent = msg;
+        setTimeout(() => { toast.classList.remove('show'); }, 3000);
     },
 
-    showCustomModal: function(title, message) {
-        const overlay = document.createElement('div');
-        overlay.className = 'fixed inset-0 bg-black bg-opacity-70 z-[100] flex items-center justify-center p-4';
-        const modal = document.createElement('div');
-        modal.className = 'bg-white rounded-xl shadow-2xl p-6 max-w-sm w-full border-t-8 border-red-600';
-        modal.innerHTML = `
-            <h3 class="text-xl font-bold text-gray-900 mb-2">${title}</h3>
-            <p class="text-gray-600 mb-6 text-sm leading-relaxed">${message}</p>
-            <button class="w-full bg-gray-900 text-white font-bold py-3 px-4 rounded-lg hover:bg-gray-800 transition-colors" onclick="this.closest('.fixed').remove()">Ciente</button>
-        `;
-        overlay.appendChild(modal);
-        document.body.appendChild(overlay);
-    },
-
-    showConfirmModal: function(title, message, onConfirm) {
-        const overlay = document.createElement('div');
-        overlay.className = 'fixed inset-0 bg-black bg-opacity-70 z-[100] flex items-center justify-center p-4';
-        const modal = document.createElement('div');
-        modal.className = 'bg-white rounded-xl shadow-2xl p-6 max-w-sm w-full border-t-8 border-indigo-600';
-        modal.innerHTML = `
-            <h3 class="text-xl font-bold text-gray-900 mb-2">${title}</h3>
-            <p class="text-gray-600 mb-6 text-sm leading-relaxed">${message}</p>
-            <div class="flex gap-3">
-                <button class="flex-1 bg-gray-100 text-gray-700 border border-gray-300 font-bold py-3 px-4 rounded-lg hover:bg-gray-200 transition-colors" onclick="this.closest('.fixed').remove()">Cancelar</button>
-                <button id="modal-confirm-btn" class="flex-1 bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-indigo-700 transition-colors">Confirmar</button>
-            </div>
-        `;
-        overlay.appendChild(modal);
-        document.body.appendChild(overlay);
-
-        document.getElementById('modal-confirm-btn').onclick = () => {
-            overlay.remove();
-            if(onConfirm) onConfirm();
+    showConfirmModal: function(title, msg, onConfirm) {
+        document.getElementById('confirm-title').textContent = title;
+        document.getElementById('confirm-msg').innerHTML = msg;
+        const modal = document.getElementById('confirm-modal');
+        const btnYes = document.getElementById('confirm-btn-yes');
+        
+        btnYes.onclick = () => {
+            modal.classList.replace('flex', 'hidden');
+            if (onConfirm) onConfirm();
         };
+        modal.classList.replace('hidden', 'flex');
+    },
+
+    showCustomModal: function(title, msg) {
+        document.getElementById('custom-alert-title').innerHTML = title;
+        document.getElementById('custom-alert-msg').innerHTML = msg;
+        const alertBox = document.getElementById('custom-alert-box');
+        const icon = document.getElementById('custom-alert-icon');
+        const btn = document.getElementById('custom-alert-btn');
+        
+        if (title.includes('Bloqueada')) {
+            alertBox.className = 'bg-white rounded-xl shadow-2xl p-6 max-w-sm w-full text-center border-t-4 border-red-500';
+            icon.className = 'mb-4 text-red-500';
+            icon.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-5xl"></i>';
+            btn.className = 'w-full bg-red-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-red-700 transition-colors';
+        } else {
+            alertBox.className = 'bg-white rounded-xl shadow-2xl p-6 max-w-sm w-full text-center border-t-4 border-blue-500';
+            icon.className = 'mb-4 text-blue-500';
+            icon.innerHTML = '<i class="fa-solid fa-circle-info text-5xl"></i>';
+            btn.className = 'w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors';
+        }
+
+        document.getElementById('custom-alert-modal').classList.replace('hidden', 'flex');
     }
 };
 
-document.addEventListener('DOMContentLoaded', () => {
+window.onload = function() {
     app.init();
-    app.renderHistory(); 
-});
+};
 </script>
 </body>
 </html>
