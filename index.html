@@ -130,20 +130,20 @@
     
     <!-- Top Navigation Bar -->
     <div class="nav-tabs shadow-sm sticky top-0 z-40" id="main-nav-tabs">
-        <div class="nav-tab active" onclick="app.switchTab('view-dashboard', this)">
+        <div class="nav-tab op-tab active" onclick="app.switchTab('view-dashboard', this)">
             <i class="fa-solid fa-clipboard-list text-blue-500"></i> Operação / Checklist
+        </div>
+        <div class="nav-tab admin-tab" onclick="app.switchTab('view-performance', this)">
+            <i class="fa-solid fa-chart-pie text-purple-500"></i> Performance
         </div>
         <div class="nav-tab admin-tab" onclick="app.switchTab('view-vehicles', this)">
             <i class="fa-solid fa-car-side text-red-500"></i> Veículos & Alertas
         </div>
         <div class="nav-tab admin-tab" onclick="app.switchTab('view-employees', this)">
-            <i class="fa-solid fa-users-gear text-emerald-500"></i> Usuários (Motoristas)
+            <i class="fa-solid fa-users-gear text-emerald-500"></i> Usuários
         </div>
         <div class="nav-tab admin-tab" onclick="app.switchTab('view-history', this)">
             <i class="fa-solid fa-folder-open text-amber-500"></i> Histórico
-        </div>
-        <div class="nav-tab admin-tab" onclick="app.switchTab('view-performance', this)">
-            <i class="fa-solid fa-chart-pie text-purple-500"></i> Performance
         </div>
     </div>
 
@@ -667,6 +667,11 @@
 </div>
 
 <script>
+// ==========================================
+// COLE A URL DO SEU GOOGLE APPS SCRIPT AQUI:
+// ==========================================
+const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbyfFPTUuKj_92oGAzFYJfD71FLaZpmRA2O7SN-yi9htFGiTI2DJXzDHsSmRMGPojtRC/exec";
+
 const app = {
     state: {
         driver: null,
@@ -685,11 +690,8 @@ const app = {
             { plate: 'XYZ-9876', model: 'Saveiro', email: 'oficina@empresa.com', kmRev: '32000', intRev: '10000', kmOil: '35000', intOil: '10000', lastChecklistDate: '2026-07-24' }
         ]
     },
-
-    charts: {
-        statusRotas: null,
-        coletasDia: null
-    },
+    
+    charts: {},
 
     init: function() {
         this.loadState();
@@ -698,6 +700,9 @@ const app = {
         const qrPlate = urlParams.get('placa');
         
         if (qrPlate) {
+            // ==========================================
+            // MODO MOTORISTA (Acesso via QR Code)
+            // ==========================================
             let vExists = this.state.vehicles.find(v => v.plate === qrPlate);
             
             if (!vExists) {
@@ -712,6 +717,7 @@ const app = {
             
             this.state.vehicle = qrPlate;
             
+            // Oculta abas do Administrador
             const adminTabs = document.querySelectorAll('.admin-tab');
             adminTabs.forEach(tab => tab.style.display = 'none');
             
@@ -722,17 +728,32 @@ const app = {
                 alertBox.innerHTML = `<i class="fa-solid fa-unlock-keyhole mr-3 text-2xl"></i><div><span class="block font-bold">Acesso Liberado: Veículo ${qrPlate}</span><span class="text-xs">Selecione seu usuário abaixo para iniciar.</span></div>`;
             }
             
+            this.switchTab('view-dashboard', document.querySelector('.op-tab'));
             this.saveState();
+        } else {
+            // ==========================================
+            // MODO ADMINISTRADOR (Acesso via Link Direto pelo PC)
+            // ==========================================
+            // O Administrador continua vendo a aba de Operação para poder testar,
+            // mas o sistema abre automaticamente no Dashboard de Performance.
+            
+            setTimeout(() => {
+                const perfTab = document.querySelector('.nav-tab[onclick*="view-performance"]');
+                if (perfTab) this.switchTab('view-performance', perfTab);
+            }, 50);
         }
 
         this.renderSelects();
         this.renderVehiclesList();
         this.renderEmployeesList();
         this.updateUI();
+        
+        // NOVO: Baixa o histórico atualizado da nuvem (Google Sheets) ao abrir o app
+        this.syncHistoryFromCloud();
 
-        if (qrPlate) {
+        if (qrPlate && this.state.vehicles.find(v => v.plate === qrPlate)) {
             const vSelect = document.getElementById('vehicle-select');
-            if(vSelect) {
+            if (vSelect) {
                 vSelect.disabled = true;
                 vSelect.classList.add('bg-slate-200', 'cursor-not-allowed', 'font-bold');
             }
@@ -749,14 +770,47 @@ const app = {
             const parsed = JSON.parse(saved);
             this.state = { ...this.state, ...parsed };
             
-            if(!this.state.drivers || this.state.drivers.length === 0) {
-                 this.state.drivers = [
-                    { id: 'MOT-001', name: 'João Silva', trainingDate: '2025-10-01', expiryDate: '2026-10-01' },
-                    { id: 'MOT-002', name: 'Maria Santos', trainingDate: '2025-05-15', expiryDate: '2026-05-15' }
-                 ];
-            }
+            if(!this.state.drivers) this.state.drivers = [];
             if(!this.state.vehicles) this.state.vehicles = [];
             if(!this.state.history) this.state.history = [];
+        }
+    },
+    
+    // ==========================================
+    // FUNÇÃO QUE PUXA OS DADOS DO GOOGLE SHEETS
+    // ==========================================
+    syncHistoryFromCloud: async function() {
+        if(GOOGLE_SHEETS_URL === "COLE_AQUI_A_URL_DO_SEU_GOOGLE_APPS_SCRIPT") {
+            console.warn("URL do Google Sheets não configurada.");
+            return;
+        }
+        
+        try {
+            // Informa visualmente que está sincronizando (só se for administrador)
+            const btnSync = document.getElementById('sync-text');
+            if(btnSync) btnSync.textContent = 'Sincronizando Nuvem...';
+            
+            const response = await fetch(GOOGLE_SHEETS_URL);
+            const data = await response.json();
+            
+            if (Array.isArray(data)) {
+                this.state.history = data;
+                this.saveState(); // Salva localmente como backup
+                this.renderHistory();
+                
+                // Se a tela de performance estiver aberta, atualiza os gráficos
+                if(document.getElementById('view-performance').classList.contains('section-hidden') === false) {
+                    this.renderDashboard();
+                }
+                
+                if(btnSync) {
+                    btnSync.textContent = 'Sincronizado';
+                    document.getElementById('sync-dot').className = 'w-2 h-2 rounded-full bg-emerald-400';
+                }
+            }
+        } catch (error) {
+            console.error("Erro ao sincronizar com nuvem:", error);
+            this.showToast("Erro ao carregar histórico da nuvem.", "warning");
         }
     },
 
@@ -1334,7 +1388,7 @@ const app = {
 
         this.showConfirmModal(
             "Finalizar Rota", 
-            "Deseja encerrar a rota atual? O relatório será salvo no Histórico e o PDF será gerado para download.",
+            "Deseja encerrar a rota atual? O relatório será salvo no Histórico, enviado para a nuvem e o PDF gerado.",
             () => {
                 const record = {
                     id: Date.now(),
@@ -1346,9 +1400,30 @@ const app = {
                     blocked: this.state.routeBlocked
                 };
 
+                this.showToast('Enviando relatório para a nuvem...', 'default');
+                
+                // ==========================================
+                // FUNÇÃO QUE ENVIA DADOS PARA O GOOGLE SHEETS
+                // ==========================================
+                if(GOOGLE_SHEETS_URL !== "COLE_AQUI_A_URL_DO_SEU_GOOGLE_APPS_SCRIPT") {
+                    fetch(GOOGLE_SHEETS_URL, {
+                        method: 'POST',
+                        // Usamos text/plain para não dar bloqueio de CORS no navegador
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' }, 
+                        body: JSON.stringify(record)
+                    }).then(res => res.json())
+                      .then(data => {
+                         this.showToast('Rota finalizada e salva na Planilha do Google!', 'success');
+                      }).catch(err => {
+                         console.error(err);
+                         this.showToast('Erro de internet. Salvo apenas offline no celular.', 'warning');
+                      });
+                } else {
+                    this.showToast('Rota finalizada (Sem integração com nuvem).', 'success');
+                }
+
                 this.state.history.unshift(record); 
                 
-                // OTIMIZAÇÃO MEMÓRIA: Limite seguro de 100 rotas para não quebrar o LocalStorage
                 if(this.state.history.length > 100) {
                     this.state.history.pop();
                 }
